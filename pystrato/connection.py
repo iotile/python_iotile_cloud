@@ -223,7 +223,7 @@ class Api(object):
             'base_url': self.base_url,
             'use_token': self.use_token
         }
-        kwargs.update({'base_url': '{0}/{1}/'.format(kwargs['base_url'], item)})
+        kwargs.update({'base_url': '{0}/{1}'.format(kwargs['base_url'], item)})
 
         return self._get_resource(**kwargs)
 
