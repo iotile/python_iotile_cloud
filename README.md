@@ -14,7 +14,5 @@ Package is based on https://github.com/samgiles/slumber
 
 pystrato requires the following modules.
 
-Python 2.7+ or 3.4+
-requests
-
-## Copyright and license
+    * Python 2.7+ or 3.4+
+    * requests
