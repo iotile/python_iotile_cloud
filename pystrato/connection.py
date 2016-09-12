@@ -57,10 +57,13 @@ class RestResource(object):
 
         new_url = self._store['base_url']
         if id is not None:
-            new_url = '{0}/{1}/'.format(new_url, id)
+            new_url = '{0}{1}/'.format(new_url, id)
 
         if action is not None:
-            new_url = os.path.join(new_url, action ) + '/'
+            new_url = '{0}{1}/'.format(new_url, action)
+
+        if not new_url.endswith('/'):
+            new_url += '/'
 
         kwargs['base_url'] = new_url
 
@@ -105,6 +108,7 @@ class RestResource(object):
 
     def url(self, args=None):
         url = self._store["base_url"]
+        print('url: {0}'.format(url))
         if args:
             url += '?{0}'.format(args)
         return url
@@ -223,7 +227,7 @@ class Api(object):
             'base_url': self.base_url,
             'use_token': self.use_token
         }
-        kwargs.update({'base_url': '{0}/{1}'.format(kwargs['base_url'], item)})
+        kwargs.update({'base_url': '{0}/{1}/'.format(kwargs['base_url'], item)})
 
         return self._get_resource(**kwargs)
 
