@@ -108,7 +108,6 @@ class RestResource(object):
 
     def url(self, args=None):
         url = self._store["base_url"]
-        print('url: {0}'.format(url))
         if args:
             url += '?{0}'.format(args)
         return url
