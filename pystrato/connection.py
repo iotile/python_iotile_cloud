@@ -24,6 +24,7 @@ from .exceptions import *
 DOMAIN_NAME = 'https://strato.arch-iot.com'
 API_PREFIX = 'api/v1'
 DEFAULT_HEADERS = {'Content-Type': 'application/json'}
+DEFAULT_TOKEN_TYPE = 'jwt'
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,8 @@ class RestResource(object):
 
         kwargs = {
             'token': self._store['token'],
-            'use_token': True,
+            'use_token': self._store['use_token'],
+            'token_type': self._store['token_type'],
             'base_url': self._store['base_url']
         }
 
@@ -117,7 +119,7 @@ class RestResource(object):
         if self._store['use_token']:
             if not "token" in self._store:
                 raise RestBaseException('No Token')
-            authorization_str = 'token %s' % self._store["token"]
+            authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
             headers['Authorization'] = authorization_str
 
         return headers
@@ -169,14 +171,17 @@ class RestResource(object):
 
 class Api(object):
     token = None
+    token_type = DEFAULT_TOKEN_TYPE
     domain = DOMAIN_NAME
     resource_class = RestResource
 
-    def __init__(self, domain=None):
+    def __init__(self, domain=None, token_type=None):
         if domain:
             self.domain = domain
         self.base_url = '{0}/{1}'.format(self.domain, API_PREFIX)
         self.use_token = True
+        if token_type:
+            self.token_type = token_type
 
     def set_token(self, token):
         self.token = token
@@ -189,7 +194,9 @@ class Api(object):
         r = requests.post(url, data=payload, headers=DEFAULT_HEADERS)
         if r.status_code == 200:
             content = json.loads(r.content.decode())
-            self.token = content['token']
+            if self.token_type in content:
+                self.token = content[self.token_type]
+
             self.username = content['username']
             logger.info('Welcome @{0} (token: {1})'.format(self.username, self.token))
             return True
@@ -200,7 +207,7 @@ class Api(object):
     def logout(self):
         url = '{0}/{1}'.format(self.base_url, 'auth/logout/')
         headers = DEFAULT_HEADERS
-        headers['Authorization'] = 'token {0}'.format(self.token)
+        headers['Authorization'] = '{0} {1}'.format(self.token_type, self.token)
 
         r = requests.post(url, headers=headers)
         if r.status_code == 204:
@@ -224,7 +231,8 @@ class Api(object):
         kwargs = {
             'token': self.token,
             'base_url': self.base_url,
-            'use_token': self.use_token
+            'use_token': self.use_token,
+            'token_type': self.token_type,
         }
         kwargs.update({'base_url': '{0}/{1}/'.format(kwargs['base_url'], item)})
 

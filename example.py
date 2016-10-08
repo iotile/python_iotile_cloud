@@ -1,7 +1,19 @@
 import getpass
 import datetime
+import logging
 from pprint import pprint
 from pystrato.connection import Api as StratoApi
+
+from logging import StreamHandler, Formatter
+
+logger = logging.getLogger(__name__)
+FORMAT = '[%(asctime)-15s] %(levelname)-6s %(message)s'
+DATE_FORMAT = '%d/%b/%Y %H:%M:%S'
+formatter = Formatter(fmt=FORMAT, datefmt=DATE_FORMAT)
+handler = StreamHandler()
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 email = input('Email? ')
 password = getpass.getpass()
@@ -14,12 +26,12 @@ if ok:
     # GET Data
     my_organizations = c.org.get()
     for org in my_organizations['results']:
-        print('I am a member of {0}'.format(org['name']))
+        logger.info('I am a member of {0}'.format(org['name']))
         org_projects = c.project.get(extra='org__slug={0}'.format(org['slug']))
         for proj in org_projects['results']:
-            print(' --> Project: {0}'.format(proj['name']))
+            logger.info(' --> Project: {0}'.format(proj['name']))
 
-    print('------------------------------')
+        logger.info('------------------------------')
 
     # POST Data Stream
     # First, get a valid stream
@@ -45,8 +57,8 @@ if ok:
                 }
 
                 resp = c.stream(action='new_data').post(data=payload)
-                print('Created new data entry: {0}'.format(resp['id']))
+                logger.info('Created new data entry: {0}'.format(resp['id']))
 
-    print('------------------------------')
+        logger.info('------------------------------')
 
     c.logout()
