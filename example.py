@@ -1,8 +1,10 @@
 import getpass
-import datetime
 import logging
-from pprint import pprint
-from pystrato.connection import Api as StratoApi
+import argparse
+import sys
+
+from pystrato.api.connection import Api
+from pystrato.stream.data import StreamData
 
 from logging import StreamHandler, Formatter
 
@@ -15,12 +17,24 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-email = input('Email? ')
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-u', '--user', dest='email', type=str, help='Email used for login')
+
+parser.add_argument('--id', dest='stream_id', type=str, help='ID of stream definition to get')
+parser.add_argument('--lastn', dest='lastn', type=int, help='Number of Entries')
+
+args = parser.parse_args()
+logger.info('--------------')
+
+if not args.email:
+    logger.error('User email is required: --user')
+    sys.exit(1)
+
 password = getpass.getpass()
 
-c = StratoApi()
+c = Api()
 
-ok = c.login(email=email, password=password)
+ok = c.login(email=args.email, password=password)
 if ok:
 
     # GET Data
@@ -31,34 +45,13 @@ if ok:
         for proj in org_projects['results']:
             logger.info(' --> Project: {0}'.format(proj['name']))
 
-        logger.info('------------------------------')
+    logger.info('------------------------------')
 
-    # POST Data Stream
-    # First, get a valid stream
-    proj_id = 'e2c434d5-9ef9-497b-8670-5592078e5a8f'
-    proj = c.project(proj_id).get()
-    if proj:
-        streams = c.stream.get(extra='project={0}'.format(proj['id']))
-        # Get first one
-        if streams['count']:
-            stream = streams['results'][0]
+    stream_data = StreamData(args.stream_id, c)
+    stream_data.initialize_from_server(lastn=100)
+    for item in stream_data.data:
+        logger.info('{0}: {1}'.format(item['timestamp'], item['value']))
 
-            # Get last entry
-            last_data = c.stream(stream['id'], action='data').get(extra='lastn=1')
-            pprint(last_data['results'])
-
-            # Post new data
-            if last_data['count']:
-                dt = datetime.datetime.utcnow()
-                payload = {
-                    'streamid': last_data['results'][0]['streamid'],
-                    'timestamp': dt.isoformat(),
-                    'value': 10
-                }
-
-                resp = c.stream(action='new_data').post(data=payload)
-                logger.info('Created new data entry: {0}'.format(resp['id']))
-
-        logger.info('------------------------------')
+    logger.info('------------------------------')
 
     c.logout()

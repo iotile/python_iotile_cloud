@@ -1,6 +1,6 @@
-# Strato Python API Package
+# IOTile Cloud Python API Package
 
-A python library for interacting with [Strato](https://strato.arch-iot.com) Rest API
+A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest API
 
 ## Installation
 

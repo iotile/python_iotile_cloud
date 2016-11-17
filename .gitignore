@@ -4,6 +4,7 @@
 *.pyc
 .env
 *.log
+*.json
 
 # Setup/Build
 build/

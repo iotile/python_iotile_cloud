@@ -21,7 +21,7 @@ import logging
 import os
 from .exceptions import *
 
-DOMAIN_NAME = 'https://strato.arch-iot.com'
+DOMAIN_NAME = 'https://iotile.cloud'
 API_PREFIX = 'api/v1'
 DEFAULT_HEADERS = {'Content-Type': 'application/json'}
 DEFAULT_TOKEN_TYPE = 'jwt'
