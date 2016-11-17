@@ -94,6 +94,40 @@ for item in stream_data.data:
 stream_data.initialize_from_server(start='2016-01-01T00:00:00.000Z' end='2016-01-30T23:00:00.000Z')
 ```
 
+Or just derive from StreamData. For example, the following script will compute Stats
+
+```
+import numpy as np
+from pystrato.api.connection import Api
+from pystrato.stream.data import StreamData
+
+
+class MyStreamData(StreamData):
+
+    def analyze(self):
+        deltas = []
+        for row in self.data:
+            d1 = row['value']
+
+        print('==================================')
+        print('Count = {0}'.format(len(deltas)))
+        print('Mean  = {0}'.format(np.mean(deltas)))
+        print('Max   = {0}'.format(np.max(deltas)))
+        print('Min   = {0}'.format(np.min(deltas)))
+        print('==================================')
+
+
+ok = c.login(email=email, password=password)
+if ok:
+    stream_data = MyStreamData(stream_id=args.stream_id, api=c)
+    stream_data.initialize_from_server(lastn=1000)
+
+     stream_data.analyze()
+
+     c.logout()
+
+```
+
 ## Requirements
 
 pystrato requires the following modules.
