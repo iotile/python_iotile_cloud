@@ -97,9 +97,16 @@ stream_data.initialize_from_server(start='2016-01-01T00:00:00.000Z' end='2016-01
 Or just derive from StreamData. For example, the following script will compute Stats
 
 ```
+import getpass
 import numpy as np
 from pystrato.api.connection import Api
 from pystrato.stream.data import StreamData
+
+
+email = 'joe@example.com'
+password = getpass.getpass()
+stream_id = 's--0000-5555--0000-5555-5555-5555--5555'
+lastn = 1000
 
 
 class MyStreamData(StreamData):
@@ -119,8 +126,8 @@ class MyStreamData(StreamData):
 
 ok = c.login(email=email, password=password)
 if ok:
-    stream_data = MyStreamData(stream_id=args.stream_id, api=c)
-    stream_data.initialize_from_server(lastn=1000)
+    stream_data = MyStreamData(stream_id=stream_id, api=c)
+    stream_data.initialize_from_server(lastn=lastn)
 
      stream_data.analyze()
 
