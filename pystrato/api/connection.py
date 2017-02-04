@@ -168,6 +168,21 @@ class RestResource(object):
         else:
             return False
 
+    def upload_file(self, filename, mode='rb', extra=None, **kwargs):
+        try:
+            payload = {
+                'file': open(filename, mode)
+            }
+        except Exception as e:
+            raise RestBaseException(str(e))
+
+        headers = {}
+        authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
+        headers['Authorization'] = authorization_str
+        logger.debug('Uploading file to {}'.format(self.url(extra)))
+        resp = requests.post(self.url(extra), files=payload, headers=headers)
+        return self._process_response(resp)
+
 
 class Api(object):
     token = None

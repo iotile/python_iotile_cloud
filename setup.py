@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pystrato',
-      version='0.3.1',
+      version='0.3.2',
       description='Python client for https://iotile.cloud',
       url='https://github.com/iotile/strato_python_api',
       author='David Karchmer',

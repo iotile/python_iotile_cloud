@@ -6,7 +6,7 @@ A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest 
 
 ```
 # pip install pystrato
-pip install git+https://github.com/iotile/strato_python_api.git@v0.3.1-alpha
+pip install git+https://github.com/iotile/strato_python_api.git@v0.3.2-alpha
 ```
 
 Package is based on https://github.com/samgiles/slumber
@@ -134,6 +134,23 @@ if ok:
      c.logout()
 
 ```
+
+### Uploading a Streamer Report
+
+Example:
+
+```
+from pystrato.api.connection import Api
+
+c = Api()
+
+ok = c.login(email=args.email, password=password)
+if ok:
+    
+    url_args = 'timestamp={}'.format(datetime.datetime.utcnow().isoformat())
+    resp = c.streamer(action='report').upload_file(filename='path/to/my/file', extra=url_args)
+```
+
 
 ## Requirements
 
