@@ -75,7 +75,10 @@ class RestResource(object):
 
         if 400 <= resp.status_code <= 499:
             exception_class = HttpNotFoundError if resp.status_code == 404 else HttpClientError
-            raise exception_class("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
+            error_msg = 'Client Error {0}: {1}'.format(resp.status_code, url)
+            if resp.status_code == 400 and resp.content:
+                error_msg += ' ({0})'.format(resp.content)
+            raise exception_class(error_msg, response=resp, content=resp.content)
         elif 500 <= resp.status_code <= 599:
             raise HttpServerError("Server Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
 

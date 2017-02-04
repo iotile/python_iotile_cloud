@@ -6,7 +6,7 @@ A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest 
 
 ```
 # pip install pystrato
-pip install git+https://github.com/iotile/strato_python_api.git@v0.3.2-alpha
+pip install git+https://github.com/iotile/strato_python_api.git@v0.3.3-alpha
 ```
 
 Package is based on https://github.com/samgiles/slumber
