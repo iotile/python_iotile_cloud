@@ -8,14 +8,12 @@ install:
 script:
 - tox
 deploy:
-  provider: pypi
-  user: iotile
-  skip_upload_docs: true
+  skip_cleanup: true
+  provider: script
+  script: python scripts/release.py $TRAVIS_TAG
   on:
     branch: master
     tags: true
-  password:
-    secure: moZzO6rj8W4bAxddSA7m8s1zgsO1SliH/2Pkxocght5SgZ9JCE6mxQBdkv8knEiL4QiQuIBqSqP7mLNKPrjOPc9uzRGMjIRuEZlpIphIFjExmZa0ERwvpEW4P5nIHD2H08MZ2bsayuej4MfDz3fbg5LfuHuEyWb1Fyfok/t3QxYHG1TkMFKJsDGrwFbbM0OF2YwxIkbjNILltFR6zY/SXbTG0I+8srz/BRAyj8gMjXgoLTWIXl3adPhYRtwdJ2eBpBa47hXSe2TsA+sMobHzEV4qcvYsx2svdTAjrlvYgo5UftcO0k9t4iFRYgSwM1YZkOpYtExmi9d/ek2oEiLp6bOL6vfM7i8kgQFdgfnR0W6dRlCqsdkEoo2U5mNueigIXKl/680vACX5DWxfTVbNv6sK7fzyEP05efHbk861m23PId3zdcuWK4xQJYH7zHXEYFr89Fix6tiuEn69YYkPOsnYyP4CatdC7vhHc7kiQxfgHpNNPxBvxVsLg4cxQ1kY5dyzwo/228yrZr8pr3dAktAYtLu9d1sohE3w+PBBNaGnDeGy63QLebr5U4H+CN4hzTVoVMA/tYJVEzUpa6DHkwfzQucbKfrN5yABjMUz7YW/Lc5hKbDPgAddztjFSMPg6VRxFbZ2p1W/shm7FP7QStFeRYd1umKxl90mI0Myc2I=
 notifications:
   on_success: always
   on_failure: always
