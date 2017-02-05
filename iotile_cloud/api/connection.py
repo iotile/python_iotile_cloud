@@ -16,7 +16,6 @@ Usage:
 import json
 import requests
 import logging
-import os
 from .exceptions import *
 
 DOMAIN_NAME = 'https://iotile.cloud'

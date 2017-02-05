@@ -1,3 +1,7 @@
+### v0.4.3 (2017-02-05)
+
+  * Add python-dateutil dependency
+  
 ### v0.4.2 (2017-02-05)
 
   * First release from CI server

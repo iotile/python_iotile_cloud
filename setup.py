@@ -5,8 +5,8 @@ setup(name='iotile_cloud',
     version=version.version,
     description='Python client for https://iotile.cloud',
     url='https://github.com/iotile/python_iotile_cloud',
-    author='David Karchmer',
-    author_email='david@arch-iot.com',
+    author='Arch Systems Inc.',
+    author_email="info@arch-iot.com",
     license='MIT',
     packages=[
         'iotile_cloud',
@@ -14,9 +14,10 @@ setup(name='iotile_cloud',
         'iotile_cloud.stream'
     ],
     install_requires=[
-        'requests'
+        'requests',
+        'python-dateutil'
     ],
-    keywords=["iotile", "arch", "embedded", "hardware"],
+    keywords=["iotile", "arch", "iot", "automation"],
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 3 - Alpha",

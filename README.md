@@ -1,12 +1,15 @@
 # IOTile Cloud Python API Package
 
+[![Build Status](https://travis-ci.org/iotile/python_iotile_cloud.svg?branch=master)](https://travis-ci.org/iotile/python_iotile_cloud)
+[![PyPI version](https://badge.fury.io/py/iotile_cloud.svg)](https://badge.fury.io/py/iotile_cloud) 
+
+
 A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest API
 
 ## Installation
 
 ```
-# pip install python_iotile_cloud
-pip install git+https://github.com/iotile/python_iotile_cloud.git@v0.4.0-alpha
+pip install python_iotile_cloud
 ```
 
 Package is based on https://github.com/samgiles/slumber
@@ -158,3 +161,4 @@ iotile_cloud requires the following modules.
 
     * Python 2.7+ or 3.4+
     * requests
+    * python-dateutil
