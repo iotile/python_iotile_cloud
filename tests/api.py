@@ -6,7 +6,7 @@ import requests_mock
 import unittest2 as unittest
 
 from iotile_cloud.api.connection import Api, RestResource
-from iotile_cloud.api import exceptions
+from iotile_cloud.api.exceptions import HttpClientError, HttpServerError
 
 
 class ApiTestCase(unittest.TestCase):
@@ -19,6 +19,13 @@ class ApiTestCase(unittest.TestCase):
         self.assertTrue(api.use_token)
         self.assertEqual(api.token_type, 'jwt')
 
+    def test_set_token(self):
+
+        api = Api()
+        self.assertEqual(api.token, None)
+        api.set_token('big-token')
+        self.assertEqual(api.token, 'big-token')
+
     @requests_mock.Mocker()
     def test_login(self, m):
         payload = {
@@ -30,7 +37,26 @@ class ApiTestCase(unittest.TestCase):
         api = Api(domain='http://iotile.test')
         ok = api.login(email='user1@test.com', password='pass')
         self.assertTrue(ok)
+        self.assertEqual(api.username, 'user1')
         self.assertEqual(api.token, 'big-token')
+
+    @requests_mock.Mocker()
+    def test_logout(self, m):
+        payload = {
+            'jwt': 'big-token',
+            'username': 'user1'
+        }
+        m.post('http://iotile.test/api/v1/auth/login/', text=json.dumps(payload))
+        m.post('http://iotile.test/api/v1/auth/logout/', status_code=204)
+
+        api = Api(domain='http://iotile.test')
+        ok = api.login(email='user1@test.com', password='pass')
+        self.assertTrue(ok)
+
+        api.logout()
+        self.assertEqual(api.username, None)
+        self.assertEqual(api.token, None)
+
 
     @requests_mock.Mocker()
     def test_get_list(self, m):
@@ -111,12 +137,54 @@ class ApiTestCase(unittest.TestCase):
         resp = api.test('my-detail').patch(payload)
         self.assertEqual(resp['id'], 1)
 
+    @requests_mock.Mocker()
+    def test_put(self, m):
+        payload = {
+            "foo": ["a", "b", "c"]
+        }
+        result = {
+            "id": 1
+        }
+        m.put('http://iotile.test/api/v1/test/my-detail/', text=json.dumps(result))
 
+        api = Api(domain='http://iotile.test')
+        resp = api.test('my-detail').put(payload)
+        self.assertEqual(resp['id'], 1)
 
+    @requests_mock.Mocker()
+    def test_delete(self, m):
+        result = {
+            "id": 1
+        }
+        m.delete('http://iotile.test/api/v1/test/my-detail/', text=json.dumps(result))
 
+        api = Api(domain='http://iotile.test')
+        deleted = api.test('my-detail').delete()
+        self.assertTrue(deleted)
 
+    @requests_mock.Mocker()
+    def test_post_with_error(self, m):
+        payload = {
+            "foo": ["a", "b", "c"]
+        }
+        result = {
+            "id": 1
+        }
+        m.post('http://iotile.test/api/v1/test/', status_code=400, text=json.dumps(result))
 
+        api = Api(domain='http://iotile.test')
+        with self.assertRaises(HttpClientError):
+            api.test.post(payload)
 
+        m.post('http://iotile.test/api/v1/test/', status_code=404, text=json.dumps(result))
 
+        api = Api(domain='http://iotile.test')
+        with self.assertRaises(HttpClientError):
+            api.test.post(payload)
 
+        m.post('http://iotile.test/api/v1/test/', status_code=500, text=json.dumps(result))
+
+        api = Api(domain='http://iotile.test')
+        with self.assertRaises(HttpServerError):
+            api.test.post(payload)
 

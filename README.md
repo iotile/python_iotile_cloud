@@ -1,7 +1,7 @@
 # IOTile Cloud Python API Package
 
 [![Build Status](https://travis-ci.org/iotile/python_iotile_cloud.svg?branch=master)](https://travis-ci.org/iotile/python_iotile_cloud)
-[![PyPI version](https://badge.fury.io/py/iotile_cloud.svg)](https://badge.fury.io/py/iotile_cloud) 
+[![PyPI version](https://img.shields.io/pypi/v/iotile_cloud.svg?maxAge=2592000)](https://pypi.python.org/pypi/iotile-cloud) 
 
 
 A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest API
@@ -162,3 +162,12 @@ iotile_cloud requires the following modules.
     * Python 2.7+ or 3.4+
     * requests
     * python-dateutil
+    
+## Development
+
+To test, run `python setup.py test` or to run coverage analysis:
+
+```
+coverage run --source=iotile_cloud setup.py test
+coverage report -m
+```
