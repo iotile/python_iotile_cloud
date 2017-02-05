@@ -8,9 +8,8 @@ install:
 script:
 - tox
 deploy:
-  skip_cleanup: true
-  provider: script
-  script: python scripts/release.py $TRAVIS_TAG
+  provider: pypi
+  user: iotile
   on:
     branch: master
     tags: true
