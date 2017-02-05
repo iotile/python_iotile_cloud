@@ -1,5 +1,3 @@
-__author__ = 'dkarchmer'
-
 """
 See https://gist.github.com/dkarchmer/d85e55f9ed5450ba58cb
 This API generically supports DjangoRestFramework based APIs

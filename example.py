@@ -3,8 +3,8 @@ import logging
 import argparse
 import sys
 
-from pystrato.api.connection import Api
-from pystrato.stream.data import StreamData
+from iotile_cloud.api.connection import Api
+from iotile_cloud.stream.data import StreamData
 
 from logging import StreamHandler, Formatter
 
@@ -47,11 +47,12 @@ if ok:
 
     logger.info('------------------------------')
 
-    stream_data = StreamData(args.stream_id, c)
-    stream_data.initialize_from_server(lastn=100)
-    for item in stream_data.data:
-        logger.info('{0}: {1}'.format(item['timestamp'], item['value']))
+    if args.stream_id:
+        stream_data = StreamData(args.stream_id, c)
+        stream_data.initialize_from_server(lastn=100)
+        for item in stream_data.data:
+            logger.info('{0}: {1}'.format(item['timestamp'], item['value']))
 
-    logger.info('------------------------------')
+        logger.info('------------------------------')
 
     c.logout()

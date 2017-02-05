@@ -5,8 +5,8 @@ A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest 
 ## Installation
 
 ```
-# pip install pystrato
-pip install git+https://github.com/iotile/strato_python_api.git@v0.3.3-alpha
+# pip install python_iotile_cloud
+pip install git+https://github.com/iotile/python_iotile_cloud.git@v0.4.0-alpha
 ```
 
 Package is based on https://github.com/samgiles/slumber
@@ -20,7 +20,7 @@ The Api class is used to login and logout from the IOTile Cloud
 Example:
 
 ```
-from pystrato.api.connection import Api
+from iotile_cloud.api.connection import Api
 
 c = Api()
 
@@ -34,7 +34,7 @@ if ok:
 If you have a JWT token, you can skip the login and just set the token:
 
 ```
-from pystrato.api.connection import Api
+from iotile_cloud.api.connection import Api
 
 c = Api()
 
@@ -44,7 +44,7 @@ c.set_token('big-ugly-token')
 You can use the Api itself to login and get a token:
 
 ```
-from pystrato.api.connection import Api
+from iotile_cloud.api.connection import Api
 
 c = Api()
 
@@ -99,8 +99,8 @@ Or just derive from StreamData. For example, the following script will compute S
 ```
 import getpass
 import numpy as np
-from pystrato.api.connection import Api
-from pystrato.stream.data import StreamData
+from iotile_cloud.api.connection import Api
+from iotile_cloud.stream.data import StreamData
 
 
 email = 'joe@example.com'
@@ -140,7 +140,7 @@ if ok:
 Example:
 
 ```
-from pystrato.api.connection import Api
+from iotile_cloud.api.connection import Api
 
 c = Api()
 
@@ -154,7 +154,7 @@ if ok:
 
 ## Requirements
 
-pystrato requires the following modules.
+iotile_cloud requires the following modules.
 
     * Python 2.7+ or 3.4+
     * requests
