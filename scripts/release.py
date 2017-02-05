@@ -103,9 +103,9 @@ def upload_component(component):
     dists = glob.glob(distpath)
 
     if pypi_user is None:
-        args = ['twine', 'upload', distpath]
+        args = ['twine', 'upload', distpath, '--skip-existing']
     else:
-        args = ['twine', 'upload', '-u', pypi_user, '-p', pypi_pass, distpath]
+        args = ['twine', 'upload', '-u', pypi_user, '-p', pypi_pass, distpath, '--skip-existing']
 
     #Invoke upload this way since subprocess call of twine cli has cross platform issues
     upload(dists, 'pypi', False, None, pypi_user, pypi_pass, None, None, '~/.pypirc', False, None, None, None)
