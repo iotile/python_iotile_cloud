@@ -41,7 +41,7 @@ class StreamData(object):
         while page:
             extra = self._get_args_dict(start=start, end=end, lastn=lastn, page=page)
             logger.debug('{0} ===> Downloading: {1}'.format(page, extra))
-            raw_data = self.api.stream(self.stream_id, action='data').get(**extra)
+            raw_data = self.api.stream(self.stream_id).data.get(**extra)
             for item in raw_data['results']:
                 if not item['display_value']:
                     item['display_value'] = 0

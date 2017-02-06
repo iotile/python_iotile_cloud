@@ -39,7 +39,7 @@ class RestResource(object):
         if 'use_token' not in self._store:
             self._store['use_token'] = False
 
-    def __call__(self, id=None, action=None):
+    def __call__(self, id=None):
         """
         Returns a new instance of self modified by one or more of the available
         parameters. These allows us to do things like override format for a
@@ -58,15 +58,38 @@ class RestResource(object):
         if id is not None:
             new_url = '{0}{1}/'.format(new_url, id)
 
-        if action is not None:
-            new_url = '{0}{1}/'.format(new_url, action)
-
         if not new_url.endswith('/'):
             new_url += '/'
 
         kwargs['base_url'] = new_url
 
-        return self.__class__(**kwargs)
+        return self._get_resource(**kwargs)
+
+    def __getattr__(self, item):
+        # Don't allow access to 'private' by convention attributes.
+        if item.startswith("_"):
+            raise AttributeError(item)
+
+        kwargs = self._copy_kwargs(self._store)
+        kwargs.update({'base_url': '{0}{1}/'.format(self._store["base_url"], item)})
+
+        return self._get_resource(**kwargs)
+
+    def _copy_kwargs(self, dictionary):
+        kwargs = {}
+        for key, value in self._iterator(dictionary):
+            kwargs[key] = value
+
+        return kwargs
+
+    def _iterator(self, d):
+        """
+        Helper to get and a proper dict iterator with Py2k and Py3k
+        """
+        try:
+            return d.iteritems()
+        except AttributeError:
+            return d.items()
 
     def _check_for_errors(self, resp, url):
 
@@ -177,6 +200,9 @@ class RestResource(object):
         logger.debug('Uploading file to {}'.format(str(kwargs)))
         resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs)
         return self._process_response(resp)
+
+    def _get_resource(self, **kwargs):
+        return self.__class__(**kwargs)
 
 
 class Api(object):

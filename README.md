@@ -101,6 +101,16 @@ for org in c.org.get()['results']:
 
 ```
 
+You can also call nested resources/actions like this:
+
+```
+# /api/v1/org/
+for org in c.org.get()['results']:
+   # /api/v1/org/<slug>/projects
+   org_projects = c.org(org['slug']).projects.get()
+
+```
+
 ### Getting Stream Data
 
 You can use `StreamData` to easily download all or partial stream data.
