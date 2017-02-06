@@ -14,7 +14,7 @@ environment:
 
 install:
   # We need wheel installed to build wheels
-  - "%PYTHON%\\python.exe -m pip install -r requirements-build.txt -r requirements-test.txt"
+  - "%PYTHON%\\python.exe -m pip install -r requirements-build.txt"
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   -
 build: off

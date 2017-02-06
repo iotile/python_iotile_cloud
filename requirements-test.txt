@@ -1,4 +1,3 @@
-tox
 mock
 requests-mock
 unittest2
