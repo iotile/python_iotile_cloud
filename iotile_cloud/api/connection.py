@@ -39,7 +39,7 @@ class RestResource(object):
         if 'use_token' not in self._store:
             self._store['use_token'] = False
 
-    def __call__(self, id=None, action=None):
+    def __call__(self, id=None):
         """
         Returns a new instance of self modified by one or more of the available
         parameters. These allows us to do things like override format for a
@@ -58,15 +58,38 @@ class RestResource(object):
         if id is not None:
             new_url = '{0}{1}/'.format(new_url, id)
 
-        if action is not None:
-            new_url = '{0}{1}/'.format(new_url, action)
-
         if not new_url.endswith('/'):
             new_url += '/'
 
         kwargs['base_url'] = new_url
 
-        return self.__class__(**kwargs)
+        return self._get_resource(**kwargs)
+
+    def __getattr__(self, item):
+        # Don't allow access to 'private' by convention attributes.
+        if item.startswith("_"):
+            raise AttributeError(item)
+
+        kwargs = self._copy_kwargs(self._store)
+        kwargs.update({'base_url': '{0}{1}/'.format(self._store["base_url"], item)})
+
+        return self._get_resource(**kwargs)
+
+    def _copy_kwargs(self, dictionary):
+        kwargs = {}
+        for key, value in self._iterator(dictionary):
+            kwargs[key] = value
+
+        return kwargs
+
+    def _iterator(self, d):
+        """
+        Helper to get and a proper dict iterator with Py2k and Py3k
+        """
+        try:
+            return d.iteritems()
+        except AttributeError:
+            return d.items()
 
     def _check_for_errors(self, resp, url):
 
@@ -108,10 +131,8 @@ class RestResource(object):
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
-    def url(self, args=None):
+    def url(self):
         url = self._store["base_url"]
-        if args:
-            url += '?{0}'.format(args)
         return url
 
     def _get_header(self):
@@ -125,10 +146,7 @@ class RestResource(object):
         return headers
 
     def get(self, **kwargs):
-        args = None
-        if 'extra' in kwargs:
-            args = kwargs['extra']
-        resp = requests.get(self.url(args), headers=self._get_header())
+        resp = requests.get(self.url(), headers=self._get_header(), params=kwargs)
         return self._process_response(resp)
 
     def post(self, data=None, **kwargs):
@@ -137,7 +155,7 @@ class RestResource(object):
         else:
             payload = None
 
-        resp = requests.post(self.url(), data=payload, headers=self._get_header())
+        resp = requests.post(self.url(), data=payload, headers=self._get_header(),)
         return self._process_response(resp)
 
     def patch(self, data=None, **kwargs):
@@ -168,7 +186,7 @@ class RestResource(object):
         else:
             return False
 
-    def upload_file(self, filename, mode='rb', extra=None, **kwargs):
+    def upload_file(self, filename, mode='rb', **kwargs):
         try:
             payload = {
                 'file': open(filename, mode)
@@ -179,9 +197,12 @@ class RestResource(object):
         headers = {}
         authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
         headers['Authorization'] = authorization_str
-        logger.debug('Uploading file to {}'.format(self.url(extra)))
-        resp = requests.post(self.url(extra), files=payload, headers=headers)
+        logger.debug('Uploading file to {}'.format(str(kwargs)))
+        resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs)
         return self._process_response(resp)
+
+    def _get_resource(self, **kwargs):
+        return self.__class__(**kwargs)
 
 
 class Api(object):

@@ -21,8 +21,6 @@ class ResourceTestCase(unittest.TestCase):
 
         url = self.base_resource.url()
         self.assertEqual(url, 'http://iotile.test/api/v1/test/')
-        url = self.base_resource.url(args='foo=bar')
-        self.assertEqual(url, 'http://iotile.test/api/v1/test/?foo=bar')
 
     def test_headers(self):
         expected_headers = {

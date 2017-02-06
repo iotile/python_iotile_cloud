@@ -61,19 +61,54 @@ if ok:
 
 The Api() can be used to access any of the APIs in https://iotile.cloud/api/v1/
 
-For example, say you want to get a list of Organizations or a given Organization
-via the https://iotile.cloud/api/v1/org/ API. You can simply:
+The Api() is generic and therefore will support any future resources supported by the IoTile Cloud Rest API.
 
 ```
-# After calling c.login() or c.set_token()
+from iotile_cloud.api.connection import Api
 
-# Get list of all organizations
-my_organizations = c.org.get()
-for org in my_organizations['results']:
-   print(str(org)
-   
-# Get a single organization
-org = c.org('my-org-slug').get()
+api = Api()
+ok = api.login(email='user@example.com', password='my.pass')
+
+## GET http://iotile.cloud/api/v1/project/
+##     Note: Any kwargs passed to get(), post(), put(), delete() will be used as url parameters
+api.org.get()
+
+## POST http://iotile.cloud/api/v1/org/
+new = api.org.post({"name": "My new Org"})
+
+## PUT http://iotile.cloud/api/v1/org/{slug}/
+api.org(new["slug"]).put({"about": "About Org"})
+
+PATCH http://iotile.cloud/api/v1/org/{slug}/
+api.org(new["slug"]).patch({"about": "About new Org"})
+
+## GET http://iotile.cloud/api/v1/org/{slug}/
+api.org(new["slug"]).get()
+
+## DELETE http://iotile.cloud/api/v1/org/{slug}/
+## NOTE: Not all resources can be deleted by users
+api.org(new["slug"]).delete()
+```
+
+You can pass arguments to any get using
+
+```
+# /api/v1/org/
+for org in c.org.get()['results']:
+   # Pass any arguments as get(foo=1, bar='2'). e.g.
+   # /api/v1/project/?org__slug=<slug>
+   org_projects = c.project.get(org__slug='{0}'.format(org['slug']))
+
+```
+
+You can also call nested resources/actions like this:
+
+```
+# /api/v1/org/
+for org in c.org.get()['results']:
+   # /api/v1/org/<slug>/projects
+   org_projects = c.org(org['slug']).projects.get()
+
 ```
 
 ### Getting Stream Data

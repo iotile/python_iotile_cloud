@@ -90,9 +90,9 @@ class ApiTestCase(unittest.TestCase):
         m.get('http://iotile.test/api/v1/test/my-detail/action/', text=json.dumps(payload))
 
         api = Api(domain='http://iotile.test')
-        resp = api.test('my-detail', action='action').url()
+        resp = api.test('my-detail').action.url()
         self.assertEqual(resp, 'http://iotile.test/api/v1/test/my-detail/action/')
-        resp = api.test('my-detail', action='action').get()
+        resp = api.test('my-detail').action.get()
         self.assertEqual(resp, {'a': 'b', 'c': 'd'})
 
     @requests_mock.Mocker()
@@ -104,9 +104,7 @@ class ApiTestCase(unittest.TestCase):
         m.get('http://iotile.test/api/v1/test/my-detail/', text=json.dumps(payload))
 
         api = Api(domain='http://iotile.test')
-        resp = api.test('my-detail').url(args='foo=bar')
-        self.assertEqual(resp, 'http://iotile.test/api/v1/test/my-detail/?foo=bar')
-        resp = api.test('my-detail').get(extra='foo=bar')
+        resp = api.test('my-detail').get(foo='bar')
         self.assertEqual(resp, {'a': 'b', 'c': 'd'})
 
     @requests_mock.Mocker()
