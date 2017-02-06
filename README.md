@@ -1,7 +1,7 @@
 # IOTile Cloud Python API Package
 
 [![Build Status](https://travis-ci.org/iotile/python_iotile_cloud.svg?branch=master)](https://travis-ci.org/iotile/python_iotile_cloud)
-[![PyPI version](https://img.shields.io/pypi/v/iotile_cloud.svg?maxAge=2592000)](https://pypi.python.org/pypi/iotile-cloud) 
+[![PyPI version](https://img.shields.io/pypi/v/iotile_cloud.svg)](https://pypi.python.org/pypi/iotile-cloud) 
 
 
 A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest API
@@ -90,7 +90,7 @@ api.org(new["slug"]).get()
 api.org(new["slug"]).delete()
 ```
 
-You can pass arguments to any get using
+You can pass arguments to any get() using
 
 ```
 # /api/v1/org/
@@ -185,8 +185,8 @@ c = Api()
 ok = c.login(email=args.email, password=password)
 if ok:
     
-    url_args = 'timestamp={}'.format(datetime.datetime.utcnow().isoformat())
-    resp = c.streamer(action='report').upload_file(filename='path/to/my/file', extra=url_args)
+    ts = '{}'.format(datetime.datetime.utcnow().isoformat())
+    resp = c.streamer(action='report').upload_file(filename='path/to/my/file', timestamp=ts)
 ```
 
 
