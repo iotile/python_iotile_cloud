@@ -108,10 +108,8 @@ class RestResource(object):
         else:
             return  # @@@ We should probably do some sort of error here? (Is this even possible?)
 
-    def url(self, args=None):
+    def url(self):
         url = self._store["base_url"]
-        if args:
-            url += '?{0}'.format(args)
         return url
 
     def _get_header(self):
@@ -125,10 +123,7 @@ class RestResource(object):
         return headers
 
     def get(self, **kwargs):
-        args = None
-        if 'extra' in kwargs:
-            args = kwargs['extra']
-        resp = requests.get(self.url(args), headers=self._get_header())
+        resp = requests.get(self.url(), headers=self._get_header(), params=kwargs)
         return self._process_response(resp)
 
     def post(self, data=None, **kwargs):
@@ -137,7 +132,7 @@ class RestResource(object):
         else:
             payload = None
 
-        resp = requests.post(self.url(), data=payload, headers=self._get_header())
+        resp = requests.post(self.url(), data=payload, headers=self._get_header(),)
         return self._process_response(resp)
 
     def patch(self, data=None, **kwargs):
@@ -168,7 +163,7 @@ class RestResource(object):
         else:
             return False
 
-    def upload_file(self, filename, mode='rb', extra=None, **kwargs):
+    def upload_file(self, filename, mode='rb', **kwargs):
         try:
             payload = {
                 'file': open(filename, mode)
@@ -179,8 +174,8 @@ class RestResource(object):
         headers = {}
         authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
         headers['Authorization'] = authorization_str
-        logger.debug('Uploading file to {}'.format(self.url(extra)))
-        resp = requests.post(self.url(extra), files=payload, headers=headers)
+        logger.debug('Uploading file to {}'.format(str(kwargs)))
+        resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs)
         return self._process_response(resp)
 
 

@@ -16,17 +16,18 @@ class StreamData(object):
         self.stream_id = stream_id
         self.api = api
 
-    def format_extra(self, page, start=None, end=None, lastn=None):
-        parts = ['page={0}'.format(page),]
+    def _get_args_dict(self, page, start=None, end=None, lastn=None):
+        parts = {}
+        parts['page'] = page
         if start:
-            parts.append('start={0}'.format(start))
+            parts['start']='{0}'.format(start)
         if end:
-            parts.append('end={0}'.format(end))
+            parts['end']='{0}'.format(end)
         if lastn:
-            parts.append('lastn={0}'.format(lastn))
-        return '&'.join(parts)
+            parts['lastn']='{0}'.format(lastn)
+        return parts
 
-    def date_format(self, timestamp):
+    def _date_format(self, timestamp):
         try:
             dt = dateutil.parser.parse(timestamp)
             return dt
@@ -38,14 +39,14 @@ class StreamData(object):
         logger.info('Downloading data for {0}'.format(self.stream_id))
         page = 1
         while page:
-            extra = self.format_extra(start=start, end=end, lastn=lastn, page=page)
+            extra = self._get_args_dict(start=start, end=end, lastn=lastn, page=page)
             logger.debug('{0} ===> Downloading: {1}'.format(page, extra))
-            raw_data = self.api.stream(self.stream_id, action='data').get(extra=extra)
+            raw_data = self.api.stream(self.stream_id, action='data').get(**extra)
             for item in raw_data['results']:
                 if not item['display_value']:
                     item['display_value'] = 0
                 self.data.append({
-                    'timestamp': self.date_format(item['timestamp']),
+                    'timestamp': self._date_format(item['timestamp']),
                     'value': item['display_value']
                 })
             if raw_data['next']:

@@ -41,7 +41,7 @@ if ok:
     my_organizations = c.org.get()
     for org in my_organizations['results']:
         logger.info('I am a member of {0}'.format(org['name']))
-        org_projects = c.project.get(extra='org__slug={0}'.format(org['slug']))
+        org_projects = c.project.get(org__slug='{0}'.format(org['slug']))
         for proj in org_projects['results']:
             logger.info(' --> Project: {0}'.format(proj['name']))
 
