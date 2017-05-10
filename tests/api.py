@@ -57,6 +57,18 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(api.username, None)
         self.assertEqual(api.token, None)
 
+    @requests_mock.Mocker()
+    def test_token_refresh(self, m):
+        payload = {
+            'token': 'new-token'
+        }
+        m.post('http://iotile.test/api/v1/auth/api-jwt-refresh/', text=json.dumps(payload))
+
+        api = Api(domain='http://iotile.test')
+        api.set_token('old-token')
+        self.assertEqual(api.token, 'old-token')
+        api.refresh_token()
+        self.assertEqual(api.token, 'new-token')
 
     @requests_mock.Mocker()
     def test_get_list(self, m):
