@@ -253,6 +253,28 @@ class Api(object):
         else:
             logger.error('Logout failed: ' + str(r.status_code) + ' ' + r.content.decode())
 
+    def refresh_token(self):
+        """
+        Refresh JWT token
+        
+        :return: True if token was refreshed. False otherwise 
+        """
+        url = '{0}/{1}'.format(self.base_url, 'auth/api-jwt-refresh/')
+
+        r = requests.post(url, data={'token': self.token}, headers=DEFAULT_HEADERS)
+        if r.status_code == 200:
+            content = json.loads(r.content.decode())
+            if 'token' in content:
+                self.token = content['token']
+
+                logger.info('Token refreshed')
+                return True
+
+        logger.error('Token refresh failed: ' + str(r.status_code) + ' ' + r.content.decode())
+        self.token = None
+        return False
+
+
     def __getattr__(self, item):
         """
         Instead of raising an attribute error, the undefined attribute will

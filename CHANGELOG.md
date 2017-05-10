@@ -1,3 +1,11 @@
+### v0.5.1 (2017-05-10)
+
+  * Add Api function to refresh token
+  
+### v0.5.0 (2017-05-10)
+
+  * Add Api function to refresh token
+  
 ### v0.4.3 (2017-02-05)
 
   * Add python-dateutil dependency
