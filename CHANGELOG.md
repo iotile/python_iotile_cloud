@@ -2,9 +2,11 @@
 
   * Add Api function to refresh token
   
-### v0.5.0 (2017-05-10)
+### v0.5.0 (2017-02-06)
 
-  * Add Api function to refresh token
+  * Changes to API to better handle nested resource actions and API arguments.
+     * Old: api.org(action='projects').get(extra='a=1&b=2')
+     * New api.org().projects.get(a=1, b=2)
   
 ### v0.4.3 (2017-02-05)
 
