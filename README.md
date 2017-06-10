@@ -9,7 +9,7 @@ A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest 
 ## Installation
 
 ```
-pip install python_iotile_cloud
+pip install iotile_cloud
 ```
 
 Package is based on https://github.com/samgiles/slumber
