@@ -206,3 +206,13 @@ To test, run `python setup.py test` or to run coverage analysis:
 coverage run --source=iotile_cloud setup.py test
 coverage report -m
 ```
+
+## Deployment
+
+To deploy to pypi:
+
+1. Update `version.py` with new version number
+1. Update `CHANGELOG.md` with description of new release
+1. Run `python setup.py test` to ensure everything is ok
+1. Commit all changes to master (PR is needed)
+1. Once everythin commited, create a new version Tag. Deployment is triggered from that.
