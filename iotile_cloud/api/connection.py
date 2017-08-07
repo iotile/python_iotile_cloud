@@ -261,7 +261,8 @@ class Api(object):
         """
         url = '{0}/{1}'.format(self.base_url, 'auth/api-jwt-refresh/')
 
-        r = requests.post(url, data={'token': self.token}, headers=DEFAULT_HEADERS)
+        payload = json.dumps({'token': self.token})
+        r = requests.post(url, data=payload, headers=DEFAULT_HEADERS)
         if r.status_code == 200:
             content = json.loads(r.content.decode())
             if 'token' in content:
