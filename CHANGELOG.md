@@ -1,3 +1,8 @@
+### v0.6.0 (2017-08-06)
+
+  * Improved StreamData, now supporting any filtering options
+  * New RawData for easy quering of the /api/v1/data/ API
+  
 ### v0.5.1 (2017-05-10)
 
   * Add Api function to refresh token

@@ -31,9 +31,9 @@ class StreamDataTestCase(unittest.TestCase):
             'next': None,
             'count': 3,
             'results': [
-                {'timestamp': '20170109T10:00:00', 'int_value': 10, 'display_value': '1'},
-                {'timestamp': '20170109T10:00:01', 'int_value': 20, 'display_value': '2'},
-                {'timestamp': '20170109T10:00:02', 'int_value': 30, 'display_value': '3'},
+                {'timestamp': '20170109T10:00:00', 'value': 10, 'output_value': '1'},
+                {'timestamp': '20170109T10:00:01', 'value': 20, 'output_value': '2'},
+                {'timestamp': '20170109T10:00:02', 'value': 30, 'output_value': '3'},
             ]
         }
         if page == '1':
@@ -47,8 +47,8 @@ class StreamDataTestCase(unittest.TestCase):
             'next': None,
             'count': 2,
             'results': [
-                {'timestamp': '20170109', 'int_value': 40, 'display_value': '4'},
-                {'timestamp': '20170109', 'int_value': 50, 'display_value': '5'},
+                {'timestamp': '20170109', 'value': 40, 'output_value': '4'},
+                {'timestamp': '20170109', 'value': 50, 'output_value': '5'},
             ]
         }
         m.get('http://iotile.test/api/v1/stream/s--0001/data/', text=json.dumps(payload))
