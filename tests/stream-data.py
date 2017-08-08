@@ -16,7 +16,7 @@ class StreamDataTestCase(unittest.TestCase):
     def setUp(self):
         api = Api(domain='http://iotile.test')
         self.stream_data = StreamData('s--0001', api)
-        self.stream_data.data = []
+        self.stream_data._data = []
 
     def _multi_page_callback(self, request, context):
         page = '1'
@@ -53,17 +53,17 @@ class StreamDataTestCase(unittest.TestCase):
         }
         m.get('http://iotile.test/api/v1/stream/s--0001/data/', text=json.dumps(payload))
 
-        self.assertEqual(len(self.stream_data.data), 0)
+        self.assertEqual(len(self.stream_data._data), 0)
         self.stream_data.initialize_from_server(lastn=3)
-        self.assertEqual(len(self.stream_data.data), 2)
+        self.assertEqual(len(self.stream_data._data), 2)
 
     @requests_mock.Mocker()
     def test_multi_page_fetch(self, m):
         m.get('http://iotile.test/api/v1/stream/s--0001/data/', text=self._multi_page_callback)
 
-        self.assertEqual(len(self.stream_data.data), 0)
+        self.assertEqual(len(self.stream_data._data), 0)
         self.stream_data.initialize_from_server(lastn=6)
-        self.assertEqual(len(self.stream_data.data), 6)
+        self.assertEqual(len(self.stream_data._data), 6)
 
 
 
