@@ -1,3 +1,7 @@
+### v0.6.1 (2017-08-08)
+
+  * Make sure StreamData._data is always cleared when calling constructor or inialization function
+  
 ### v0.6.0 (2017-08-06)
 
   * Improved StreamData, now supporting any filtering options
