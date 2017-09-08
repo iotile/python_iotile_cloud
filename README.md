@@ -250,6 +250,14 @@ parts = id.get_parts()
 self.assertEqual(str(parts['project']), str(project))
 self.assertEqual(str(parts['device']), str(device))
 self.assertEqual(str(parts['variable']), str(variable))
+
+# Other forms of use
+device = IOTileDeviceSlug('000a)
+assert(str(device) == 'd--0000-0000-0000-000a')
+device = IOTileDeviceSlug(d--000a)
+assert(str(device) == 'd--0000-0000-0000-000a')
+device = IOTileDeviceSlug(0xa)
+assert(str(device) == 'd--0000-0000-0000-000a')
 ```
 
 ## Requirements

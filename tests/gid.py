@@ -23,6 +23,8 @@ class GIDTestCase(unittest.TestCase):
     def test_device_slug(self):
         id = IOTileDeviceSlug(5)
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
+        id = IOTileDeviceSlug(0xa)
+        self.assertEqual(str(id), 'd--0000-0000-0000-000a')
 
         id = IOTileDeviceSlug('d--0000-0000-1234')
         self.assertEqual(str(id), 'd--0000-0000-0000-1234')
