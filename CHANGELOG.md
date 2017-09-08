@@ -1,3 +1,7 @@
+### v0.6.2 (2017-09-08)
+
+  * New `utils.gid` API to process ID Slugs
+  
 ### v0.6.1 (2017-08-08)
 
   * Make sure StreamData._data is always cleared when calling constructor or inialization function

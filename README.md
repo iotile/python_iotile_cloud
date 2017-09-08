@@ -14,7 +14,46 @@ pip install iotile_cloud
 
 Package is based on https://github.com/samgiles/slumber
 
+## IOTile Cloud Resource Overview
+
+In a Rest API, Resources represent tables in the database. The following resources are available in **IOTile Cloud**:
+
+- **account**: Represent users. A user only has access to its own user profile
+- **org**: Users belong to Organizations as members. Some of these users can act as admins for the organization.
+- **porject**: Organizations contain Projects. Projects group information about a given set of devices.
+- **device**: A device represents a physical IOTile devices (Like POD-1) or virtual devices
+- **variable**: Variables are used to represent the outputs of a device. e.g. If a device has two sensors, you 
+may have Variable `IO 1` and `IO 2`.
+- **stream**: Streams represent a globally unique instance of data comming from a given sensor. 
+- **data**: Every Stream represents the time series data. This resource can be used to access this data.
+This API always requires a `?filter=<slug>` to filter the data, where the slud is one of the universally unique global IDs
+
+### Globally Unique IDs
+
+Most of the key records in the database use a universally unique ID, in the form of an ID Slug. We borrow the term slug
+from blogging systems because we use it the same way to create unique but readable URLs.
+
+The following are the resources that use a globally unique ID:
+
+- Projects use **p--0000-0001** (Note that project is the one object which the APIs do not use a slug for. Instead, projects require a UUID).
+- Variable **v--0000-0001--5001** represent variable 5001 in project 1
+- Device **d--0000-0000-0000-0001** represent device 1. Note that this is also the Serial Number for the device itself,
+and can be found on each IOTile Device.
+- Stream **s--0000-0001--0000-0000-0000-0002--5001** represent variable 5001 for device 2 in project 1.
+
+You can see how:
+
+- Slug components are separated by a ‘--’ string
+- A one character letter represents the type of slug: ‘p’, ‘d’, ‘v’ and ‘s’
+- Projects are represented with an 8 character HEX number
+- Devices are represented with a 16 character HEX number
+- Per device Variables are represented with a 4 character HEX number
+- Variable Ids are local to a project and therefore require the project ID to globally uniquify them.
+- Globally unique streams use project, device and variable IDs
+
+
 ## User Guide
+
 
 ### Login and Logout
 
@@ -189,6 +228,37 @@ if ok:
     resp = c.streamer(action='report').upload_file(filename='path/to/my/file', timestamp=ts)
 ```
 
+### Globaly unique ID slugs
+
+To easily handle ID slugs, use the `utils.gid` package:
+
+```
+project = IOTileProjectSlug(5)
+assert(str(project) == 'p--0000-0005')
+
+device = IOTileDeviceSlug(10)
+assert(str(device) == 'd--0000-0000-0000-000a')
+
+variable = IOTileVariableSlug('5001', project)
+assert(str(variable) == 'v--0000-0005--5001')
+
+id = IOTileStreamSlug()
+id.from_parts(project=project, device=device, variable=variable)
+assert(str(id) == 's--0000-0005--0000-0000-0000-000a--5001')
+
+parts = id.get_parts()
+self.assertEqual(str(parts['project']), str(project))
+self.assertEqual(str(parts['device']), str(device))
+self.assertEqual(str(parts['variable']), str(variable))
+
+# Other forms of use
+device = IOTileDeviceSlug('000a)
+assert(str(device) == 'd--0000-0000-0000-000a')
+device = IOTileDeviceSlug(d--000a)
+assert(str(device) == 'd--0000-0000-0000-000a')
+device = IOTileDeviceSlug(0xa)
+assert(str(device) == 'd--0000-0000-0000-000a')
+```
 
 ## Requirements
 
