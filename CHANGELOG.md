@@ -1,3 +1,7 @@
+### v0.6.5 (2017-09-10)
+
+  * Fixes deployment issue
+
 ### v0.6.4 (2017-09-10)
 
   * Add missing package to setup.py
