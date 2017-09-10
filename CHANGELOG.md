@@ -1,3 +1,8 @@
+### v0.6.3 (2017-09-10)
+
+  * Add IOTileCloudSlug.get_id() to convert slug back to an id when appropriate
+  * Add IOTileBlockSlug() for DataBlock Slugs
+  
 ### v0.6.2 (2017-09-08)
 
   * New `utils.gid` API to process ID Slugs
