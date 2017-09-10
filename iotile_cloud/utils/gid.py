@@ -29,6 +29,12 @@ def fix_gid(gid, num_terms):
     return'-'.join(elements)
 
 
+def gid2int(gid):
+    elements = gid.split('-')
+    hex_value = ''.join(elements)
+    return int(hex_value, 16)
+
+
 class IOTileCloudSlug(object):
     _slug = None
 
@@ -40,13 +46,19 @@ class IOTileCloudSlug(object):
         return gid_join(parts[1:])
 
     def set_from_single_id_slug(self, type, terms, id):
-        assert(type in ['p', 'd'])
+        assert(type in ['p', 'd', 'b'])
         assert (isinstance(id, str))
         parts = gid_split(id)
-        if parts[0] in ['p', 'd']:
+        if parts[0] in ['p', 'd', 'b']:
             id = parts[1]
         id = fix_gid(id, terms)
         self._slug = gid_join([type, id])
+
+    def get_id(self):
+        parts = gid_split(self._slug)
+        assert(len(parts) == 2)
+        assert(parts[0] in ['p', 'd'])
+        return gid2int(parts[1])
 
 
 class IOTileProjectSlug(IOTileCloudSlug):
@@ -69,6 +81,49 @@ class IOTileDeviceSlug(IOTileCloudSlug):
         else:
             did = id
         self.set_from_single_id_slug('d', 4, did)
+
+
+class IOTileBlockSlug(IOTileCloudSlug):
+    """Formatted Global DataBlock ID: b--0001-0000-0000-0001"""
+    _block = None
+
+    def __init__(self, id, block=0):
+        if isinstance(id, int):
+            did = int2did(id)
+        else:
+            parts = gid_split(id)
+            if(len(parts) == 1):
+                parts = ['d',] + parts
+            assert(parts[0] in ['d', 'b'])
+            id_parts = parts[1].split('-')
+            if parts[0] == 'b':
+                assert(len(id_parts) == 4)
+                self._slug = id
+                self._block = id_parts[0]
+                return
+            if len(id_parts) == 4:
+                self._block = id_parts[0]
+                did = '-'.join(id_parts[1:])
+            else:
+                assert(parts[0] == 'd')
+                did = '-'.join(id_parts[0:])
+                print(did)
+        did = fix_gid(did, 3)
+        if not self._block:
+            self._block = int2bid(block)
+        self.set_from_single_id_slug('b', 4, '-'.join([self._block, did]))
+
+    def get_id(self):
+        # DataBlocks should behave like Devices
+        # get_id returns the device ID
+        parts = gid_split(self._slug)
+        assert(len(parts) == 2)
+        id_parts = parts[1].split('-')
+        hex_value = ''.join(id_parts[1:])
+        return int(hex_value, 16)
+
+    def get_block(self):
+        return gid2int(self._block)
 
 
 class IOTileVariableSlug(IOTileCloudSlug):

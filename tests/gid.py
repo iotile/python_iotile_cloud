@@ -40,6 +40,30 @@ class GIDTestCase(unittest.TestCase):
 
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0005')
 
+    def test_block_slug(self):
+        id = IOTileBlockSlug(5)
+        self.assertEqual(str(id), 'b--0000-0000-0000-0005')
+        id = IOTileBlockSlug(0xa)
+        self.assertEqual(str(id), 'b--0000-0000-0000-000a')
+
+        self.assertRaises(AssertionError, IOTileBlockSlug, 'b--0000-0000-1234')
+
+        id = IOTileBlockSlug('b--0001-0000-0000-1234')
+        self.assertEqual(str(id), 'b--0001-0000-0000-1234')
+        self.assertEqual(id._block, '0001')
+
+        id = IOTileBlockSlug('d--1234', block=3)
+        self.assertEqual(str(id), 'b--0003-0000-0000-1234')
+
+        id = IOTileBlockSlug('0005', block=3)
+        self.assertEqual(str(id), 'b--0003-0000-0000-0005')
+        self.assertEqual(id._block, '0003')
+
+        self.assertEqual(id.get_id(), 5)
+        self.assertEqual(id.get_block(), 3)
+
+        self.assertEqual(id.formatted_id(), '0003-0000-0000-0005')
+
     def test_variable_slug(self):
         self.assertRaises(AssertionError, IOTileVariableSlug, 5)
 
@@ -73,3 +97,14 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(parts['project']), str(project))
         self.assertEqual(str(parts['device']), str(device))
         self.assertEqual(str(parts['variable']), str(variable))
+
+    def test_id_property(self):
+        project = IOTileProjectSlug(5)
+        self.assertEqual(project.get_id(), 5)
+        device = IOTileDeviceSlug(10)
+        self.assertEqual(device.get_id(), 10)
+        variable = IOTileVariableSlug('5001', project)
+
+        id = IOTileStreamSlug()
+        id.from_parts(project=project, device=device, variable=variable)
+        self.assertRaises(AssertionError, id.get_id)
