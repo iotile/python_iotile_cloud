@@ -11,6 +11,7 @@ setup(name='iotile_cloud',
     packages=[
         'iotile_cloud',
         'iotile_cloud.api',
+        'iotile_cloud.utils',
         'iotile_cloud.stream'
     ],
     install_requires=[

@@ -1,3 +1,7 @@
+### v0.6.4 (2017-09-10)
+
+  * Add missing package to setup.py
+
 ### v0.6.3 (2017-09-10)
 
   * Add IOTileCloudSlug.get_id() to convert slug back to an id when appropriate
