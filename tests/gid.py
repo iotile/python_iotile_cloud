@@ -59,6 +59,9 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(id), 'b--0003-0000-0000-0005')
         self.assertEqual(id._block, '0003')
 
+        self.assertEqual(id.get_id(), 5)
+        self.assertEqual(id.get_block(), 3)
+
         self.assertEqual(id.formatted_id(), '0003-0000-0000-0005')
 
     def test_variable_slug(self):

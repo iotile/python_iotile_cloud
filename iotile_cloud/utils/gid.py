@@ -114,7 +114,16 @@ class IOTileBlockSlug(IOTileCloudSlug):
         self.set_from_single_id_slug('b', 4, '-'.join([self._block, did]))
 
     def get_id(self):
-        assert(False)
+        # DataBlocks should behave like Devices
+        # get_id returns the device ID
+        parts = gid_split(self._slug)
+        assert(len(parts) == 2)
+        id_parts = parts[1].split('-')
+        hex_value = ''.join(id_parts[1:])
+        return int(hex_value, 16)
+
+    def get_block(self):
+        return gid2int(self._block)
 
 
 class IOTileVariableSlug(IOTileCloudSlug):
