@@ -99,6 +99,7 @@ class IOTileBlockSlug(IOTileCloudSlug):
             if parts[0] == 'b':
                 assert(len(id_parts) == 4)
                 self._slug = id
+                self._block = id_parts[0]
                 return
             if len(id_parts) == 4:
                 self._block = id_parts[0]

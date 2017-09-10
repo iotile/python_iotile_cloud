@@ -50,6 +50,7 @@ class GIDTestCase(unittest.TestCase):
 
         id = IOTileBlockSlug('b--0001-0000-0000-1234')
         self.assertEqual(str(id), 'b--0001-0000-0000-1234')
+        self.assertEqual(id._block, '0001')
 
         id = IOTileBlockSlug('d--1234', block=3)
         self.assertEqual(str(id), 'b--0003-0000-0000-1234')
