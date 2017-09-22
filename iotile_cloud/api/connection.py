@@ -234,7 +234,7 @@ class Api(object):
                 self.token = content[self.token_type]
 
             self.username = content['username']
-            logger.info('Welcome @{0} (token: {1})'.format(self.username, self.token))
+            logger.debug('Welcome @{0}'.format(self.username))
             return True
         else:
             logger.error('Login failed: ' + str(r.status_code) + ' ' + r.content.decode())
@@ -247,7 +247,7 @@ class Api(object):
 
         r = requests.post(url, headers=headers)
         if r.status_code == 204:
-            logger.info('Goodbye @{0}'.format(self.username))
+            logger.debug('Goodbye @{0}'.format(self.username))
             self.username = None
             self.token = None
         else:

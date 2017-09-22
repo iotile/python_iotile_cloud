@@ -58,8 +58,6 @@ class BaseData(object):
         logger.debug('==================================')
 
 
-
-
 class StreamData(BaseData):
     _stream_id = None
 
