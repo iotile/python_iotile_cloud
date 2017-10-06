@@ -1,3 +1,8 @@
+### v0.7.0 (2017-10-05)
+
+  * New data.report.AccumulationReportGenerator to compute sums across projects, devices and/or streams
+  * Allow set_token to switch token_type
+
 ### v0.6.5 (2017-09-10)
 
   * Fixes deployment issue
