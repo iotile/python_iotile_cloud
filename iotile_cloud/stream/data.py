@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseData(object):
-    _data = []
+    data = []
     _api = None
 
     def __init__(self, api):
         self._api = api
-        self._data = []
+        self.data = []
 
     def _get_args_dict(self, page, *args, **kwargs):
         parts = {}
@@ -39,14 +39,14 @@ class BaseData(object):
     def initialize_from_server(self, *args, **kwargs):
         logger.debug('Downloading data')
         page = 1
-        self._data = []
+        self.data = []
         while page:
             extra = self._get_args_dict(page=page, *args, **kwargs)
-            logger.info('{0} ===> Downloading: {1}'.format(page, extra))
+            logger.debug('{0} ===> Downloading data: {1}'.format(page, extra))
             raw_data = self._fetch_data(**extra)
             if 'results' in raw_data:
                 for item in raw_data['results']:
-                    self._data.append(item)
+                    self.data.append(item)
                 if raw_data['next']:
                     logger.debug('Getting more: {0}'.format(raw_data['next']))
                     page += 1
@@ -54,10 +54,8 @@ class BaseData(object):
                     page = 0
 
         logger.debug('==================================')
-        logger.debug('Downloaded a total of {0} records'.format(len(self._data)))
+        logger.debug('Downloaded a total of {0} records'.format(len(self.data)))
         logger.debug('==================================')
-
-
 
 
 class StreamData(BaseData):

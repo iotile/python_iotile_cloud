@@ -206,9 +206,47 @@ if ok:
     stream_data = MyStreamData(stream_id=stream_id, api=c)
     stream_data.initialize_from_server(lastn=lastn)
 
-     stream_data.analyze()
+    stream_data.analyze()
 
-     c.logout()
+    c.logout()
+
+```
+
+### User Reports
+
+Package includes a simple utility to generate accumulation reports:
+
+```
+from pprint import pprint
+from iotile_cloud.api.connection import Api
+from iotile_cloud.stream.report import AccumulationReportGenerator
+
+# Generate report for all streams from:
+sources = [
+    'p--0000-0001', # Project 1
+    'd--1111',      # Device 0x111
+    's--0000-0002--0000-0000-0000-2222--5001'  # Stream 5001 for device 0x222 in project 2       
+]
+ok = c.login(email=email, password=password)
+if ok:
+    gen = AccumulationReportGenerator(c)
+    stats = gen.compute_sum(sources=sources, start=t0, end=t1)
+
+    c.logout()
+```
+
+Produces:
+
+```
+{'streams': {'s--0000-0001--0000-0000-0000-0097--5002': {'sum': 1000.0,
+                                                         'units': 'G'},
+             's--0000-0001--0000-0000-0000-00a0--5001': {'sum': 1500.0,
+                                                         'units': 'G'},
+             's--0000-0003--0000-0000-0000-1111--5001': {'sum': 2000.0,
+                                                         'units': 'G'},
+             's--0000-0002--0000-0000-0000-2222--5001': {'sum': 3000.0,
+                                                         'units': 'G'}},
+ 'total': 7500.0}
 
 ```
 
