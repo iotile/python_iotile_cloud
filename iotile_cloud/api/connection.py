@@ -219,8 +219,10 @@ class Api(object):
         if token_type:
             self.token_type = token_type
 
-    def set_token(self, token):
+    def set_token(self, token, token_type=None):
         self.token = token
+        if token_type:
+            self.token_type = token_type
 
     def login(self, password, email):
         data = {'email': email, 'password': password}
@@ -259,6 +261,7 @@ class Api(object):
         
         :return: True if token was refreshed. False otherwise 
         """
+        assert self.token_type == DEFAULT_TOKEN_TYPE
         url = '{0}/{1}'.format(self.base_url, 'auth/api-jwt-refresh/')
 
         payload = json.dumps({'token': self.token})
