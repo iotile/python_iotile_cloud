@@ -8,6 +8,16 @@ A python library for interacting with [IOTile Cloud](https://iotile.cloud) Rest 
 
 ## Installation
 
+When it comes to using Python packages, it is always recommened you use a Python Virtual Env. Using Python 3, you can simply do
+
+```
+python3 -m venv  ~/.virtualenv/iotile-cloud
+```
+
+or follow the many tutorials on the Web to install `virtualenv` on Python 2.
+
+Once you have set up a virtual, env, simply install the package with:
+
 ```
 pip install iotile_cloud
 ```
@@ -191,7 +201,7 @@ class MyStreamData(StreamData):
     def analyze(self):
         deltas = []
         for row in self.data:
-            d1 = row['value']
+            deltas.append(row['value'])
 
         print('==================================')
         print('Count = {0}'.format(len(deltas)))
