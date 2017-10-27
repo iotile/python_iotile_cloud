@@ -1,70 +1,91 @@
-import getpass
+"""
+Sample script to use IOTile Cloud
+Main purpose of this example is to show how easy it is to use the Api class
+The script first gets all organizations you have access to, and for each one, it gets all its projects.
+It then uses the stream ID passed as an argument to get data for that stream
+
+MyScript derives from BaseMain and overwrites the after_login function
+The BaseMain will execute the following flow:
+
+        self.domain = self.get_domain()
+        self.api = Api(self.domain)
+        self.before_login()
+        ok = self.login()
+        if ok:
+            self.after_login()
+            self.logout()
+            self.after_logout()
+
+    See iotile_cloud/utils/main.py for additional details
+
+"""
 import logging
-import argparse
-import sys
 
 from iotile_cloud.api.connection import Api
-from iotile_cloud.stream.data import StreamData, RawData
+from iotile_cloud.utils.main import BaseMain
+from iotile_cloud.stream.data import StreamData
 from iotile_cloud.api.exceptions import HttpNotFoundError
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='[%(asctime)-15s] %(levelname)-6s %(message)s',
-                    datefmt='%d/%b/%Y %H:%M:%S')
 
 logger = logging.getLogger(__name__)
 
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('-u', '--user', dest='email', type=str, help='Email used for login')
 
-parser.add_argument('-s', '--stream', dest='stream', type=str, help='Stream ID')
-
-args = parser.parse_args()
-logger.info('--------------')
-
-if not args.email:
-    logger.error('User email is required: --user')
-    sys.exit(1)
-
-password = getpass.getpass()
-
-c = Api()
-
-ok = c.login(email=args.email, password=password)
-if ok:
-
+class MyScript(BaseMain):
     """
-     Example for calling a GET: https://iotile.cloud/api/v1/org/
-     And for each returned Organization, calling: https://iotile.cloud/api/v1/org/<slug>/projects/
-     Other examples:
-      all_my_projects = c.project.get()
-      all_my_devices = c.device.get()
-      all_my_streams = c.stream.get()
-    """
-    all_my_organizations = c.org.get()
-    for org in all_my_organizations['results']:
-        logger.info('I am a member of {0}'.format(org['name']))
-        org_projects = c.org(org['slug']).projects.get()
-        for proj in org_projects['results']:
-            logger.info(' --> Project: {0}'.format(proj['name']))
+    It executed the following on its main function:
 
-    logger.info('------------------------------')
+    So, we just have to overwrite the after_login function where we can write code to get data from server
+    """
 
-    """
-    Example for using the StreamData class to query the last 10 data points for
-    a given stream. For 10 items, this would be equivalent to just calling:
-       stream_data = c.stream(args.stream).data.get(lastn=10)
-    but StreamData is useful when getting more than 1K points, where you need
-    to recursively fetch each page (1K at a time).
-    """
-    if args.stream:
-        stream_data = StreamData(args.stream, c)
-        try:
-            stream_data.initialize_from_server(lastn=10)
-        except HttpNotFoundError as e:
-            logger.error(e)
-        for item in stream_data.data:
-            logger.info('{0}: {1}'.format(item['timestamp'], item['output_value']))
+    def after_login(self):
+        """
+         Example for calling a GET: https://iotile.cloud/api/v1/org/
+         And for each returned Organization, calling: https://iotile.cloud/api/v1/org/<slug>/projects/
+         Other examples:
+          all_my_projects = c.project.get()
+          all_my_devices = c.device.get()
+          all_my_streams = c.stream.get()
+        """
+        all_my_organizations = self.api.org.get()
+        for org in all_my_organizations['results']:
+            logger.info('I am a member of {0}'.format(org['name']))
+            org_projects = self.api.org(org['slug']).projects.get()
+            for proj in org_projects['results']:
+                logger.info(' --> Project: {0}'.format(proj['name']))
 
         logger.info('------------------------------')
 
-    c.logout()
+        """
+        Example for using the StreamData class to query the last 10 data points for
+        a given stream. For 10 items, this would be equivalent to just calling:
+           stream_data = api.stream(args.stream).data.get(lastn=10)
+        but StreamData is useful when getting more than 1K points, where you need
+        to recursively fetch each page (1K at a time).
+        """
+        if self.args.stream:
+            stream_data = StreamData(self.args.stream, self.api)
+            try:
+                stream_data.initialize_from_server(lastn=10)
+            except HttpNotFoundError as e:
+                logger.error(e)
+            for item in stream_data.data:
+                logger.info('{0}: {1}'.format(item['timestamp'], item['output_value']))
+
+            logger.info('------------------------------')
+
+
+if __name__ == '__main__':
+
+    # Pass extra arguments to be used to initialize the argparse Parser
+    extra_args = [
+        {
+            'args': ['stream'],
+            'kwargs': {
+                'metavar': 'stream',
+                'type': str,
+                'help': 'Stream Slug. e.g. s--0000-0001--0000-0000-0000-0001--5001'
+            }
+        }
+    ]
+    work = MyScript(extra_args)
+    work.main()
+
