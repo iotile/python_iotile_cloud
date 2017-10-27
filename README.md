@@ -308,6 +308,76 @@ device = IOTileDeviceSlug(0xa)
 assert(str(device) == 'd--0000-0000-0000-000a')
 ```
 
+### BaseMain Utility Class
+
+As you can see from the examples above, every script is likely to follow the following format:
+
+```
+# Parse arguments from user and get password
+# Login to server
+# Do some real work
+# Logout
+```
+
+To make it easy to add this boilerplate code, the BaseMain can be used to follow a predefined, opinionated flow
+which basically configures the `logging` and `argsparse` python packages with a basic configuration during the 
+construction. Then the `main()` method runs the following flow, where each function call can be overwritten in your
+own derived class
+
+
+```
+   self.domain = self.get_domain()
+   self.api = Api(self.domain)
+   self.before_login()
+   ok = self.login()
+   if ok:
+       self.after_login()
+       self.logout()
+       self.after_logout()
+```
+
+An example of how to use this class is shown below:
+
+```
+class MyScript(BaseMain):
+
+    def before_login(self):
+        logger.info('-----------')
+
+    def after_login(self):
+        # Main function to OVERWITE and do real work
+        do_some_real_work(self.api, self.args)
+
+    def login(self):
+        # Add extra message welcoming user
+        ok = super(MyScript, self).login()
+        if ok:
+            logger.info('Welcome {0}'.format(self.args.email))
+        return ok
+
+    def logout(self):
+        # Add extra message to say Goodbye
+        super(MyScript, self).logout()
+        logger.info('Goodbye!')
+
+
+if __name__ == '__main__':
+
+    # Pass extra arguments to be used to initialize the argparse Parser
+    extra_args = [
+        {
+            'args': ['stream'],
+            'kwargs': {
+                'metavar': 'stream',
+                'type': str,
+                'help': 'Stream Slug. e.g. s--0000-0001--0000-0000-0000-0001--5001'
+            }
+        }
+    ]
+    work = MyScript(extra_args)
+    work.main()
+```
+
 ## Requirements
 
 iotile_cloud requires the following modules.
