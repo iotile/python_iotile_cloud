@@ -36,6 +36,12 @@ class MyScript(BaseMain):
     So, we just have to overwrite the after_login function where we can write code to get data from server
     """
 
+    def add_extra_args(self):
+        # Add extra argument to take stream slug from user
+        self.parser.add_argument('stream', metavar='stream', type=str,
+                                 help='Stream Slug. e.g. s--0000-0001--0000-0000-0000-0001--5001')
+
+
     def after_login(self):
         """
          Example for calling a GET: https://iotile.cloud/api/v1/org/
@@ -75,17 +81,6 @@ class MyScript(BaseMain):
 
 if __name__ == '__main__':
 
-    # Pass extra arguments to be used to initialize the argparse Parser
-    extra_args = [
-        {
-            'args': ['stream'],
-            'kwargs': {
-                'metavar': 'stream',
-                'type': str,
-                'help': 'Stream Slug. e.g. s--0000-0001--0000-0000-0000-0001--5001'
-            }
-        }
-    ]
-    work = MyScript(extra_args)
+    work = MyScript()
     work.main()
 

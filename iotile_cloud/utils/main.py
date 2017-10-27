@@ -14,19 +14,20 @@ class BaseMain(object):
     api = None
     domain = 'https://iotile.cloud'
 
-    def __init__(self, extra_args):
+    def __init__(self):
         """
         Initialize Logging configuration
         Initialize argument parsing
         Process any extra arguments
         Only hard codes one required argument: --user
-        :param extra_args: Array of objects with extra arguments. Obj should have { 'args': '', kwargs={}}
+        Additional arguments can be configured by overwriting the add_extra_args() method
+        Logging configuration can be changed by overwritting the config_logging() method
         """
         self.config_logging()
         self.parser = argparse.ArgumentParser(description=__doc__)
         self.parser.add_argument('-u', '--user', dest='email', type=str, help='Email used for login')
 
-        self.add_extra_args(extra_args)
+        self.add_extra_args()
 
         self.args = self.parser.parse_args()
 
@@ -70,16 +71,12 @@ class BaseMain(object):
                             format='[%(asctime)-15s] %(levelname)-6s %(message)s',
                             datefmt='%d/%b/%Y %H:%M:%S')
 
-    def add_extra_args(self, extra_args):
+    def add_extra_args(self):
         """
         Overwrite to change the way extra arguments are added to the args parser
-        :param extra_args: Array of objects with extra arguments. Obj should have { 'args': '', kwargs={}}
         :return: Nothing
         """
-        for item in extra_args:
-            positional = item['args']
-            options = item['kwargs']
-            self.parser.add_argument(*positional, **options)
+        pass
 
     def get_domain(self):
         """
