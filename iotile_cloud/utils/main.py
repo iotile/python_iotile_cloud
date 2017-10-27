@@ -34,6 +34,10 @@ class BaseMain(object):
             logger.error('User email is required: --user')
             sys.exit(1)
 
+    def _critical_exit(self, msg):
+        logger.error(msg)
+        sys.exit(1)
+
     def main(self):
         """
         Main function to call to initiate execution.
