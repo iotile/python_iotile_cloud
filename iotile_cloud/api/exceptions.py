@@ -42,6 +42,11 @@ class HttpServerError(RestHttpBaseException):
     Called when the server tells us there was a server error (5xx).
     """
 
+class HttpCouldNotVerifyServerError(RestHttpBaseException):
+    """
+    Called when the server identifies itself with a self-signed or untrusted certificate.
+    """
+
 
 class SerializerNoRestailable(RestBaseException):
     """
