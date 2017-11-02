@@ -1,6 +1,11 @@
-### v0.7.1 (2017-11-02)
+### v0.7.2 (2017-11-02)
 
   * Allow users to specify a verify=False option in Api() that disabled SSL certificate verification for iotile.cloud
+
+### v0.7.1 (2017-10-27)
+  
+  * Adds a BaseMain Class to be used to reduce boiler plate code when writing scripts.
+  * Helps configure the logging and argument parsing.
 
 ### v0.7.0 (2017-10-05)
 
