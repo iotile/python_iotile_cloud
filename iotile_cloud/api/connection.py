@@ -38,6 +38,8 @@ class RestResource(object):
         self._store = kwargs
         if 'use_token' not in self._store:
             self._store['use_token'] = False
+        if 'verify' not in self._store:
+            self._store['verify'] = True
 
     def __call__(self, id=None):
         """
@@ -51,7 +53,8 @@ class RestResource(object):
             'token': self._store['token'],
             'use_token': self._store['use_token'],
             'token_type': self._store['token_type'],
-            'base_url': self._store['base_url']
+            'base_url': self._store['base_url'],
+            'verify': self._store['verify']
         }
 
         new_url = self._store['base_url']
@@ -146,7 +149,11 @@ class RestResource(object):
         return headers
 
     def get(self, **kwargs):
-        resp = requests.get(self.url(), headers=self._get_header(), params=kwargs)
+        try:
+            resp = requests.get(self.url(), headers=self._get_header(), params=kwargs, verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         return self._process_response(resp)
 
     def post(self, data=None, **kwargs):
@@ -155,7 +162,11 @@ class RestResource(object):
         else:
             payload = None
 
-        resp = requests.post(self.url(), data=payload, headers=self._get_header(),)
+        try:
+            resp = requests.post(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         return self._process_response(resp)
 
     def patch(self, data=None, **kwargs):
@@ -164,7 +175,11 @@ class RestResource(object):
         else:
             payload = None
 
-        resp = requests.patch(self.url(), data=payload, headers=self._get_header())
+        try:
+            resp = requests.patch(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         return self._process_response(resp)
 
     def put(self, data=None, **kwargs):
@@ -173,11 +188,19 @@ class RestResource(object):
         else:
             payload = None
 
-        resp = requests.put(self.url(), data=payload, headers=self._get_header())
+        try:
+            resp = requests.put(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         return self._process_response(resp)
 
     def delete(self, **kwargs):
-        resp = requests.delete(self.url(), headers=self._get_header())
+        try:
+            resp = requests.delete(self.url(), headers=self._get_header(), verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         if 200 <= resp.status_code <= 299:
             if resp.status_code == 204:
                 return True
@@ -198,7 +221,12 @@ class RestResource(object):
         authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
         headers['Authorization'] = authorization_str
         logger.debug('Uploading file to {}'.format(str(kwargs)))
-        resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs)
+
+        try:
+            resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs, verify=self._store['verify'])
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         return self._process_response(resp)
 
     def _get_resource(self, **kwargs):
@@ -211,13 +239,15 @@ class Api(object):
     domain = DOMAIN_NAME
     resource_class = RestResource
 
-    def __init__(self, domain=None, token_type=None):
+    def __init__(self, domain=None, token_type=None, verify=True):
         if domain:
             self.domain = domain
         self.base_url = '{0}/{1}'.format(self.domain, API_PREFIX)
         self.use_token = True
         if token_type:
             self.token_type = token_type
+
+        self.verify = verify
 
     def set_token(self, token, token_type=None):
         self.token = token
@@ -229,7 +259,12 @@ class Api(object):
         url = '{0}/{1}'.format(self.base_url, 'auth/login/')
 
         payload = json.dumps(data)
-        r = requests.post(url, data=payload, headers=DEFAULT_HEADERS)
+
+        try:
+            r = requests.post(url, data=payload, headers=DEFAULT_HEADERS, verify=self.verify)
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         if r.status_code == 200:
             content = json.loads(r.content.decode())
             if self.token_type in content:
@@ -247,7 +282,11 @@ class Api(object):
         headers = DEFAULT_HEADERS
         headers['Authorization'] = '{0} {1}'.format(self.token_type, self.token)
 
-        r = requests.post(url, headers=headers)
+        try:
+            r = requests.post(url, headers=headers, verify=self.verify)
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         if r.status_code == 204:
             logger.debug('Goodbye @{0}'.format(self.username))
             self.username = None
@@ -265,7 +304,12 @@ class Api(object):
         url = '{0}/{1}'.format(self.base_url, 'auth/api-jwt-refresh/')
 
         payload = json.dumps({'token': self.token})
-        r = requests.post(url, data=payload, headers=DEFAULT_HEADERS)
+
+        try:
+            r = requests.post(url, data=payload, headers=DEFAULT_HEADERS, verify=self.verify)
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
         if r.status_code == 200:
             content = json.loads(r.content.decode())
             if 'token' in content:
@@ -295,6 +339,7 @@ class Api(object):
             'base_url': self.base_url,
             'use_token': self.use_token,
             'token_type': self.token_type,
+            'verify': self.verify
         }
         kwargs.update({'base_url': '{0}/{1}/'.format(kwargs['base_url'], item)})
 
