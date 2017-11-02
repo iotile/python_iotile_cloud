@@ -107,7 +107,6 @@ class IOTileBlockSlug(IOTileCloudSlug):
             else:
                 assert(parts[0] == 'd')
                 did = '-'.join(id_parts[0:])
-                print(did)
         did = fix_gid(did, 3)
         if not self._block:
             self._block = int2bid(block)
@@ -167,9 +166,12 @@ class IOTileStreamSlug(IOTileCloudSlug):
             self._slug = id
 
     def from_parts(self, project, device, variable):
-        assert(isinstance(project, IOTileProjectSlug))
-        assert(isinstance(device, IOTileDeviceSlug))
-        assert(isinstance(variable, IOTileVariableSlug))
+        if not isinstance(project, IOTileProjectSlug):
+            project = IOTileProjectSlug(project)
+        if not isinstance(device, IOTileDeviceSlug):
+            device = IOTileDeviceSlug(device)
+        if not isinstance(variable, IOTileVariableSlug):
+            variable = IOTileVariableSlug(variable)
         self._slug = gid_join(['s', project.formatted_id(), device.formatted_id(), variable.formatted_local_id()])
 
     def get_parts(self):

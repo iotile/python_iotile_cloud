@@ -84,6 +84,12 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileStreamSlug('s--0000-0001--0000-0000-0000-0002--0003')
         self.assertEqual(str(id), 's--0000-0001--0000-0000-0000-0002--0003')
 
+        parts = id.get_parts()
+        self.assertEqual(str(parts['project']), 'p--0000-0001')
+        self.assertEqual(str(parts['device']), 'd--0000-0000-0000-0002')
+        self.assertEqual(str(parts['variable']), 'v--0000-0001--0003')
+
+    def test_stream_from_parts(self):
         project = IOTileProjectSlug(5)
         device = IOTileDeviceSlug(10)
         variable = IOTileVariableSlug('5001', project)
@@ -97,6 +103,24 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(parts['project']), str(project))
         self.assertEqual(str(parts['device']), str(device))
         self.assertEqual(str(parts['variable']), str(variable))
+
+        id = IOTileStreamSlug()
+        pslug = 'p--0000-0006'
+        dslug = 'd--0000-0000-0000-0100'
+        vslug = 'v--0000-0006--5002'
+        id.from_parts(project=pslug, device=dslug, variable=vslug)
+        self.assertEqual(str(id), 's--0000-0006--0000-0000-0000-0100--5002')
+
+        parts = id.get_parts()
+        self.assertEqual(str(parts['project']), pslug)
+        self.assertEqual(str(parts['device']), dslug)
+        self.assertEqual(str(parts['variable']), vslug)
+
+        id = IOTileStreamSlug()
+        vslug = 'v--0000-0006--5002'
+        id.from_parts(project=7, device=1, variable=vslug)
+        self.assertEqual(str(id), 's--0000-0007--0000-0000-0000-0001--5002')
+
 
     def test_id_property(self):
         project = IOTileProjectSlug(5)

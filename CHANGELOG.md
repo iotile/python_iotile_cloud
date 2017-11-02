@@ -1,6 +1,7 @@
 ### v0.7.2 (2017-11-02)
 
   * Allow users to specify a verify=False option in Api() that disabled SSL certificate verification for iotile.cloud
+  * Allow IOTileCloudStreamSlug.from_parts to accept non-IOTileCloud*Slug object arguments
 
 ### v0.7.1 (2017-10-27)
   
