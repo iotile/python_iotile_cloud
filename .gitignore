@@ -13,4 +13,4 @@ dist/
 *.egg
 .tox/
 .coverage
-
+.cache
