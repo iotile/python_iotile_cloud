@@ -4,12 +4,13 @@ class MdoHelper(object):
     _o = None
 
     def __init__(self, m, d, o=None):
-        self._m = m
-        self._d = d
-        self._o = o
-        assert(isinstance(self._m, int ) and self._m != 0)
-        assert(isinstance(self._d, int ) and self._d != 0)
-        assert(self._o is None or isinstance(self._o, int ) or isinstance(self._o, float ))
+        assert(isinstance(m, int ) and m != 0)
+        assert(isinstance(d, int ) and d != 0)
+        assert(o is None or isinstance(o, int ) or isinstance(o, float ))
+        self._m = float(m)
+        self._d = float(d)
+        if o:
+            self._o = float(o)
 
     def compute(self, value):
         ret_value = 0.0
