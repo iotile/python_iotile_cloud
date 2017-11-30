@@ -1,3 +1,7 @@
+### v0.7.3 (2017-11-29)
+
+  * Add utils.mdo.MdoHelper class to help with raw stream data conversions
+
 ### v0.7.2 (2017-11-02)
 
   * Allow users to specify a verify=False option in Api() that disabled SSL certificate verification for iotile.cloud

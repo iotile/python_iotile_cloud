@@ -371,6 +371,31 @@ if __name__ == '__main__':
     work.main()
 ```
 
+### Misc Utilities
+
+#### MdoHelper (advance)
+
+IOTile Cloud assumes data is transformed in multiple places using a simple Multiple, Divide and Offset (or MDO) 
+set of values. For example, streams use output_units, which include an MDO that can be used to convert the 
+internal value stored on the data stream into this output unit. The MdoHelper is a simple class to help with these
+converstions.
+
+```
+from iotile_cloud.stream.data import StreamData
+from iotile_cloud.utils.mdo import MdoHelper
+
+stream = api.stream('s--0000-0001--0000-0000-0000-0001--5001').get()
+units = stream['output_unit']
+mdo = MdoHelper(m=units.get('m', 1), d=units.get('d', 1), o=units.get('o', 0.0))
+
+# Get unmodified internal data. The 'value' member is based on some internal storage units for the given stream type
+stream_data = StreamRawData(stream['slug'], api)
+
+stream_data.initialize_from_server(lastn=100)
+for item in stream_data.data:
+    print('{0}: {1}'.format(item['timestamp'], mdo.compute_value(item['value'])))
+```
+
 ## Requirements
 
 iotile_cloud requires the following modules.
