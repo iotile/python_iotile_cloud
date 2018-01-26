@@ -125,6 +125,43 @@ class IOTileBlockSlug(IOTileCloudSlug):
         return gid2int(self._block)
 
 
+class IOTileStreamerSlug(IOTileCloudSlug):
+    """Formatted Global Streamer ID: t--0000-0000-0000-0000--0000.
+
+    Args:
+        device (str, int or IOTileDeviceSlug): The device that this streamer corresponds with.
+        index (int): The sub-index of the stream in the device, typically a small number in [0, 8)
+    """
+
+    def __init__(self, device, index):
+        if isinstance(device, int):
+            device_id = device
+        elif isinstance(device, IOTileDeviceSlug):
+            device_id = device.get_id()
+        elif isinstance(device, str):
+            device_id = IOTileDeviceSlug(device).get_id()
+        else:
+            raise ValueError("Unknwon device specifier, must be string, int or IOTileDeviceSlug")
+
+        index = int(index)
+
+        device_gid48 = int2did(device_id)
+        index_gid = int16gid(index)
+        device_gid = fix_gid(device_gid48, 4)
+
+        self._slug = gid_join(['t', device_gid, index_gid])
+        self._device = gid_join(['d', device_gid])
+        self._index = index_gid
+
+    def get_device(self):
+        """Get the device slug as a string."""
+        return self._device
+
+    def get_index(self):
+        """Get the streamer index in the device as a padded string."""
+        return self._index
+
+
 class IOTileVariableSlug(IOTileCloudSlug):
     """Formatted Global Variable ID: v--0000-0001--5000"""
 

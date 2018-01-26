@@ -1,4 +1,5 @@
 import unittest2 as unittest
+import pytest
 
 from iotile_cloud.utils.gid import *
 
@@ -132,3 +133,24 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileStreamSlug()
         id.from_parts(project=project, device=device, variable=variable)
         self.assertRaises(AssertionError, id.get_id)
+
+
+def test_streamer_gid():
+    """Ensure that IOTileStreamerSlug works."""
+
+    s_gid = IOTileStreamerSlug(1, 2)
+    assert str(s_gid) == "t--0000-0000-0000-0001--0002"
+    assert s_gid.get_device() == "d--0000-0000-0000-0001"
+    assert s_gid.get_index() == "0002"
+
+    s_gid = IOTileStreamerSlug("d--0000-0000-0000-1234", 1)
+    assert str(s_gid) == "t--0000-0000-0000-1234--0001"
+
+    with pytest.raises(ValueError):
+        IOTileStreamerSlug([], 1)
+
+    d_gid = IOTileDeviceSlug(15)
+    s_gid = IOTileStreamerSlug(d_gid, 0)
+    assert str(s_gid) == "t--0000-0000-0000-000f--0000"
+    assert s_gid.get_device() == str(d_gid)
+    assert s_gid.get_index() == "0000"

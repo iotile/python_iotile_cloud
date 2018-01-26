@@ -15,7 +15,6 @@ Example usage can be found by looking at:
 - tests/conftest.py for example fixture setup including populating
   the mock cloud with data.
 - tests/data for example mock cloud data
-
 """
 
 from __future__ import (absolute_import, division,
@@ -24,8 +23,11 @@ from __future__ import (absolute_import, division,
 import re
 import os.path
 import json
+import datetime
 import csv
 import logging
+import uuid
+import iotile_cloud.utils.gid as gid
 
 try:
     import pytest
@@ -44,47 +46,61 @@ class ErrorCode(Exception):
 class MockIOTileCloud(object):
     """A test instance of IOTile.cloud for continuous integration."""
 
+    DEFAULT_ORG_NAME = 'Quick Test Org'
+    DEFAULT_ORG_SLUG = 'quick-test-org'
+
     def __init__(self, config_file=None):
         self.logger = logging.getLogger(__name__)
+
+        self._config_file = config_file
+        self.reset()
+
+        self.apis = []
+        self._add_api(r"/api/v1/auth/login/", self.login)
+        self._add_api(r"/api/v1/account/", self.account)
+
+        # APIs for getting raw data
+        self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
+        self._add_api(r"/api/v1/event/([0-9]+)/data/", self.get_raw_event)
+
+        # APIs for querying single models
+        self._add_api(r"/api/v1/device/(d--[0-9\-a-f]+)/", lambda x, y: self.one_object('devices', x, y))
+        self._add_api(r"/api/v1/datablock/(b--[0-9\-a-f]+)/", lambda x, y: self.one_object('datablocks', x, y))
+        self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/", lambda x, y: self.one_object('streams', x, y))
+        self._add_api(r"/api/v1/streamer/(t--[0-9\-a-f]+)/", lambda x, y: self.one_object('streamers', x, y))
+        self._add_api(r"/api/v1/project/([0-9\-a-f]+)/", lambda x, y: self.one_object('projects', x, y))
+        self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
+        self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
+
+        # APIs for listing models
+        self._add_api(r"/api/v1/stream/", self.list_streams)
+        self._add_api(r"/api/v1/event/", self.list_events)
+        self._add_api(r"/api/v1/property/", self.list_properties)
+        self._add_api(r"/api/v1/streamer/", self.list_streamers)
+
+    def reset(self):
+        """Clear any stored data in in this cloud as if we created a new instance."""
 
         self.request_count = 0
         self.error_count = 0
 
-        self.apis = []
         self.users = {}
         self.devices = {}
         self.datablocks = {}
         self.streams = {}
         self.properties = {}
         self.projects = {}
+        self.orgs = {}
+        self.streamers = {}
 
         self.events = {}
 
         self.stream_folder = None
 
-        if config_file is not None:
-            self.add_data(config_file)
+        if self._config_file is not None:
+            self.add_data(self._config_file)
 
-        self.add_api("/api/v1/auth/login/", self.login)
-        self.add_api("/api/v1/account/", self.account)
-
-        # APIs for getting raw data
-        self.add_api("/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
-        self.add_api("/api/v1/event/([0-9]+)/data/", self.get_raw_event)
-
-        # APIs for querying single models
-        self.add_api("/api/v1/device/(d--[0-9\-a-f]+)/", lambda x, y: self.one_object('devices', x, y))
-        self.add_api("/api/v1/datablock/(b--[0-9\-a-f]+)/", lambda x, y: self.one_object('datablocks', x, y))
-        self.add_api("/api/v1/stream/(s--[0-9\-a-f]+)/", lambda x, y: self.one_object('streams', x, y))
-        self.add_api("/api/v1/project/([0-9\-a-f]+)/", lambda x, y: self.one_object('projects', x, y))
-        self.add_api("/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
-
-        # APIs for listing models
-        self.add_api(r"/api/v1/stream/", self.list_streams)
-        self.add_api(r"/api/v1/event/", self.list_events)
-        self.add_api(r"/api/v1/property/", self.list_properties)
-
-    def add_api(self, regex, callback):
+    def _add_api(self, regex, callback):
         """Add an API matching a regex."""
 
         matcher = re.compile(regex)
@@ -167,6 +183,19 @@ class MockIOTileCloud(object):
                 results = [x for x in self.events.values() if x['device'] == filter_str]
             else:
                 raise ErrorCode(500)
+
+        return self._paginate(results, request, 100)
+
+    def list_streamers(self, request):
+        """List and possibly filter streamers."""
+
+        results = []
+        
+        device_slug = request.args.get('device')
+        if device_slug is not None:
+            results = [x for x in self.streamers.values() if x['device'] == device_slug]
+        else:
+            results = [x for x in self.streamers.values()]
 
         return self._paginate(results, request, 100)
 
@@ -351,6 +380,261 @@ class MockIOTileCloud(object):
         self.projects.update({x['id']: x for x in data.get('projects', [])})
         self.events.update({x['id']: x for x in data.get('events', [])})
 
+    def _find_unique_slug(self, slug_type, current_slugs):
+        """Generate a unique slug of the given type.
+
+        Type should be 'p', 'd', etc. corresponding to the first
+        letter of the slug.
+        """
+
+        slug_types = {
+            'p': gid.IOTileProjectSlug,
+            'd': gid.IOTileDeviceSlug
+        }
+
+        slug_obj = slug_types.get(slug_type)
+        if slug_obj is None:
+            raise ValueError("Unknown slug type: %s" % slug_type)
+
+        guess = len(current_slugs)
+        guess_slug = str(slug_obj(guess))
+
+        while guess_slug in current_slugs:
+            guess += 1
+            guess_slug = str(slug_obj(guess))
+
+        return guess_slug, guess
+
+    def quick_add_project(self, name=None, org_slug=None):
+        """Quickly create an empty default project and add it to the mock cloud.
+    
+        The project will be added under the quick-test-org organization, which
+        is automatically created if it doesn't exist unless you specify a different
+        organization explicitly.
+
+        Args:
+            name (str): Optional label for the project.
+            org_slug (str): Optional slug to create this project under a specific
+                org.  The org must exist if you specify it explicitly.  Otherwise
+                the project will be created under the default quick-test-org.
+
+        Returns:
+            (str, str): The new project id and slug that were added.  Note that this function returns
+                a UUID and a slug since both are important for projects.
+        """
+
+        known_projects = set([x['slug'] for x in self.projects])
+
+        slug, _numerical_id = self._find_unique_slug('p', known_projects)
+        
+        if org_slug is None:
+            org_slug = self._ensure_quicktest_org()
+
+        if org_slug not in self.orgs:
+            raise ValueError("Attempted to add a project to an org that does not exist, slug: %s" % org_slug)
+
+        if name is None:
+            name = "Autogenerated Project %d" % (len(self.projects) + 1,)
+
+        proj_id = str(uuid.uuid4())
+
+        proj_data = {
+            "id": proj_id,
+            "name": name,
+            "slug": slug,
+            "gid": slug[3:],
+            "org": org_slug,
+            "about": "",
+            "project_template": "default-template-v1-0-0",
+            "created_on": self._fixed_utc_timestr(),
+            "craeted_by": "quick_test_user"
+        }
+
+        self.projects[proj_id] = proj_data
+        return proj_id, slug
+
+    def quick_add_org(self, name, slug=None):
+        """Quickly add a new org.
+
+        Orgs are just groups of projects so all you need to
+        provide is a name for what it should be called and
+        the resulting slug to reference when creating a project
+        will be returned.
+
+        Args:
+            name (str): The name of the organization to add.  The
+                name of the organization must contain only letters,
+                numbers and spaces.  It must not contain any
+                non-alphanumeric characters unless you specify an
+                org slug explicitly.
+
+            slug (str): Optional slug of the org.  Autogenerated
+                if not given.
+
+        Returns:
+            str: The slug of the created organization
+        """
+
+        if slug is None:
+            slug = name.lower().replace(' ', '-')
+
+        if slug in self.orgs:
+            raise ValueError("Attempted to add a duplicate organization")
+
+        org_data = {
+            "id": str(uuid.uuid4()),
+            "name": name,
+            "slug": slug,
+            "about": "",
+            "created_on": self._fixed_utc_timestr(),
+            "created_by": "quick_test_user",
+            "avatar": {
+                "tiny": None,
+                "thumbnail": None
+            }
+        }
+
+        self.orgs[slug] = org_data
+        return slug
+
+    def quick_add_user(self, email="test@arch-iot.com", password="test"):
+        """Quickly add a user.
+
+        The default arguments if none are specified will add a single user:
+        test@arch-iot.com with password "test"
+
+        Args:
+            email (str): The user's email address
+            password (str): The user's password
+        """
+
+        if email in self.users:
+            raise ValueError("User already exists, email: %s" % email)
+
+        self.users[email] = password
+
+    def quick_add_device(self, project_id, device_id=None, streamers=None):
+        """Quickly add a device to the given project.
+
+        You can optionally specify a list of integers which will be used
+        to initialize the cloud acknowledgment values for those streamers
+        on this device.
+
+        Args:
+            project_id (str): The string uuid of the project you want to 
+                add this device to.
+            device_id (int or str): The device id or slug to add.  
+                If this is not specified, a new unique id is allocated.
+            streamers (list of int): A list of streamer acknowledgement values
+                to initialize the cloud with.
+
+        Returns:
+            str: The device slug that was created.
+        """
+    
+        if project_id not in self.projects:
+            raise ValueError("Unknown project id: %s" % project_id)
+
+        if device_id is None:
+            slug, device_id = self._find_unique_slug('d', set(self.devices.keys()))
+        else:
+            slug_obj = gid.IOTileDeviceSlug(device_id)
+            slug = str(slug_obj)
+            device_id = slug_obj.get_id()
+
+        if slug in self.devices:
+            raise ValueError("Attempted to add a duplicate device slug: %s" % slug)
+
+        dev_info = {
+            "id": device_id,
+            "slug": slug,
+            "gid": slug[3:],
+            "label": "Unnamed device %d" % (len(self.devices) + 1,),
+            "active": True,
+            "external_id": "",
+            "sg": "water-meter-v1-1-0",
+            "template": "internaltestingtemplate-v0-1-0",
+            "org": "arch-internal",
+            "project": project_id,
+            "lat": None,
+            "lon": None,
+            "created_on": self._fixed_utc_timestr(),
+            "claimed_by": "quick_test_user",
+            "claimed_on": self._fixed_utc_timestr()
+        }
+
+        self.devices[slug] = dev_info
+
+        for i, ack in enumerate(streamers):
+            self.quick_add_streamer(slug, i, ack)
+
+        return slug
+
+    def quick_add_streamer(self, device_id, streamer_index, streamer_ack, selector=None):
+        """Add a streamer record for a device and streamer combination.
+
+        Streamer records store a "sequence number" for the last reading 
+        received from a device selected by a fixed selection criteria.  
+        As of writing time, devices can have up to 8 streamers numbered 0-7.
+
+        Each streamer is an independent channel over which to safely transmit
+        readings to the cloud.  Each streamer has an independent streamer record.
+        
+        Args:
+            device_id (int or str): The device id or slug that we are adding
+                a streamer record for.
+            streamer_index (int): The streamer index for the record we are adding
+            streamer_ack (int): The highest reading id we want to claim is
+                acknowledged by the cloud.
+            selector (int): Optional selector criteria used by this streamer.  If this
+                is specified it is used as is.  If not, the default selector for each
+                index is used.
+        """
+
+        default_selectors = {
+            0: 0xd7ff,
+            1: 0x5fff
+        }
+
+        streamer_index = int(streamer_index)
+        streamer_ack = int(streamer_ack)
+
+        if selector is None:
+            selector = default_selectors.get(streamer_index)
+        
+        if selector is None:
+            selector = 0xFFFF
+
+        streamer_slug_obj = gid.IOTileStreamerSlug(device_id, streamer_index)
+        device_slug = streamer_slug_obj.get_device()
+        streamer_slug = str(streamer_slug_obj)
+        
+        streamer_data = {
+            "id": len(self.streamers) + 1,
+            "slug": streamer_slug,
+            "device": device_slug,
+            "index": streamer_index,
+            "last_id": streamer_ack,
+            "last_reboot_ts": self._fixed_utc_timestr(),
+            "is_system": bool(selector != 0xFFFF and (selector & (1 << 11))),
+            "selector": selector
+        }
+
+        self.streamers[streamer_slug] = streamer_data
+
+    def _fixed_utc_timestr(self):
+        """Create an unchanging utc timestring that is timezone aware."""
+
+        return datetime.datetime(2018, 1, 1).isoformat() + 'Z'
+
+    def _ensure_quicktest_org(self):
+        """Ensure that the quick-test-org org is added."""
+
+        if self.DEFAULT_ORG_SLUG not in self.orgs:
+            self.quick_add_org(self.DEFAULT_ORG_NAME, slug=self.DEFAULT_ORG_SLUG)
+
+        return self.DEFAULT_ORG_SLUG
+
 
 @pytest.fixture(scope="module")
 def mock_cloud():
@@ -364,6 +648,8 @@ def mock_cloud():
     server.start()
     domain = server.url
     yield domain, cloud
+    
+    cloud.reset()
     server.stop()
 
 
@@ -377,4 +663,17 @@ def mock_cloud_nossl():
     server.start()
     domain = server.url
     yield domain, cloud
+
+    cloud.reset()
     server.stop()
+
+
+@pytest.fixture(scope="function")
+def mock_cloud_private(mock_cloud_nossl):
+    """A Mock cloud instance that is reset after each test function without ssl."""
+
+    domain, cloud = mock_cloud_nossl
+
+    cloud.reset()
+    yield domain, cloud
+    cloud.reset()

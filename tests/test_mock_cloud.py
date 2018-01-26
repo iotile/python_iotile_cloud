@@ -3,7 +3,9 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import os.path
+import pytest
 from iotile_cloud.api.connection import Api
+from iotile_cloud.api.exceptions import HttpNotFoundError
 
 
 def test_mock_cloud_login(water_meter):
@@ -73,4 +75,65 @@ def test_data_access(water_meter):
     raw2 = api.event(2).data.get()
     assert raw2 == {"test": 1, "goodbye": 15}
 
-    vartype = api.vartype('water-meter-volume').get()
+    api.vartype('water-meter-volume').get()
+
+
+def test_quick_add_functionality(mock_cloud_private):
+    """Make sure quick add functions work."""
+
+    domain, cloud = mock_cloud_private
+    api = Api(domain=domain)
+
+    res = api.login('test', 'test@arch-iot.com')
+    assert res is False
+
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    res = api.login('test', 'test@arch-iot.com')
+    assert res is True
+
+
+    proj_id, slug = cloud.quick_add_project()
+
+    proj_data = api.project(proj_id).get()
+    assert proj_data['id'] == proj_id
+    assert proj_data['slug'] == slug
+
+    org_data = api.org(proj_data['org']).get()
+    assert org_data['slug'] == "quick-test-org"
+
+
+def test_quick_add_device(mock_cloud_private):
+    """Make sure quick_add_device works."""
+
+    domain, cloud = mock_cloud_private
+    api = Api(domain=domain)
+
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    api.login('test', 'test@arch-iot.com')
+
+    res = api.streamer.get()
+    assert len(res['results']) == 0
+
+    proj_id, slug = cloud.quick_add_project()
+    device_slug15 = cloud.quick_add_device(proj_id, 15, streamers=[10, 15])
+    device_slug20 = cloud.quick_add_device(proj_id, 20, streamers=[1])
+
+    res = api.streamer.get()
+    assert len(res['results']) == 3
+
+    res = api.streamer.get(device=device_slug15)
+    assert len(res['results']) == 2
+
+    res = api.streamer('t--0000-0000-0000-000f--0001').get()
+    assert res['last_id'] == 15
+    assert res['device'] == device_slug15
+    assert res['is_system'] is True
+
+    with pytest.raises(HttpNotFoundError):
+        api.streamer('t--0000-0000-0000-0015--0001').get()
+
+    res = api.device(device_slug15).get()
+    assert res['slug'] == device_slug15
+
+    res = api.device(device_slug20).get()
+    assert res['slug'] == device_slug20
