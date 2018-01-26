@@ -78,10 +78,10 @@ def test_data_access(water_meter):
     api.vartype('water-meter-volume').get()
 
 
-def test_quick_add_functionality(mock_cloud_private):
+def test_quick_add_functionality(mock_cloud_private_nossl):
     """Make sure quick add functions work."""
 
-    domain, cloud = mock_cloud_private
+    domain, cloud = mock_cloud_private_nossl
     api = Api(domain=domain)
 
     res = api.login('test', 'test@arch-iot.com')
@@ -102,10 +102,10 @@ def test_quick_add_functionality(mock_cloud_private):
     assert org_data['slug'] == "quick-test-org"
 
 
-def test_quick_add_device(mock_cloud_private):
+def test_quick_add_device(mock_cloud_private_nossl):
     """Make sure quick_add_device works."""
 
-    domain, cloud = mock_cloud_private
+    domain, cloud = mock_cloud_private_nossl
     api = Api(domain=domain)
 
     cloud.quick_add_user('test@arch-iot.com', 'test')
@@ -117,6 +117,7 @@ def test_quick_add_device(mock_cloud_private):
     proj_id, slug = cloud.quick_add_project()
     device_slug15 = cloud.quick_add_device(proj_id, 15, streamers=[10, 15])
     device_slug20 = cloud.quick_add_device(proj_id, 20, streamers=[1])
+    device_slug = cloud.quick_add_device(proj_id)
 
     res = api.streamer.get()
     assert len(res['results']) == 3
@@ -137,3 +138,38 @@ def test_quick_add_device(mock_cloud_private):
 
     res = api.device(device_slug20).get()
     assert res['slug'] == device_slug20
+
+
+def test_list_devices(mock_cloud_private_nossl):
+    """Make sure we can list and filter devices."""
+
+    domain, cloud = mock_cloud_private_nossl
+    api = Api(domain=domain)
+
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    api.login('test', 'test@arch-iot.com')
+
+    proj_id1, _slug1 = cloud.quick_add_project()
+    device_slug1_1 = cloud.quick_add_device(proj_id1, 15)
+    device_slug1_2 = cloud.quick_add_device(proj_id1, 20)
+
+    proj_id2, _slug2 = cloud.quick_add_project()
+    device_slug2_1 = cloud.quick_add_device(proj_id2)
+    device_slug2_2 = cloud.quick_add_device(proj_id2)
+    device_slug2_3 = cloud.quick_add_device(proj_id2)
+
+    res = api.device.get()
+    assert len(res['results']) == 5
+
+    print(proj_id1)
+    print(proj_id2)
+
+    res = api.device.get(project=proj_id1)
+    devs = set([x['slug'] for x in res['results']])
+    print(devs)
+    assert device_slug1_1 in devs and device_slug1_2 in devs and len(devs) == 2
+
+    res = api.device.get(project=proj_id2)
+    devs = set([x['slug'] for x in res['results']])
+    print(res)
+    assert device_slug2_1 in devs and device_slug2_2 in devs and device_slug2_3 in devs and len(devs) == 3

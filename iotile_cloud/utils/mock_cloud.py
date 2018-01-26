@@ -77,6 +77,7 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/event/", self.list_events)
         self._add_api(r"/api/v1/property/", self.list_properties)
         self._add_api(r"/api/v1/streamer/", self.list_streamers)
+        self._add_api(r"/api/v1/device/", self.list_devices)
 
     def reset(self):
         """Clear any stored data in in this cloud as if we created a new instance."""
@@ -166,6 +167,17 @@ class MockIOTileCloud(object):
             results = [x for x in self.streams.values() if x['project'] == request.args['project'] or x['project_id'] == request.args['project']]
         elif 'block' in request.args:
             results = [x for x in self.streams.values() if x['block'] == request.args['block']]
+
+        return self._paginate(results, request, 100)
+
+    def list_devices(self, request):
+        """List and possibly filter devices."""
+
+        results = []
+        if 'project' in request.args:
+            results = [x for x in self.devices.values() if x['project'] == request.args['project']]
+        else:
+            results = self.devices.values()
 
         return self._paginate(results, request, 100)
 
@@ -423,7 +435,7 @@ class MockIOTileCloud(object):
                 a UUID and a slug since both are important for projects.
         """
 
-        known_projects = set([x['slug'] for x in self.projects])
+        known_projects = set([x['slug'] for x in self.projects.values()])
 
         slug, _numerical_id = self._find_unique_slug('p', known_projects)
         
@@ -541,6 +553,9 @@ class MockIOTileCloud(object):
             slug_obj = gid.IOTileDeviceSlug(device_id)
             slug = str(slug_obj)
             device_id = slug_obj.get_id()
+
+        if streamers is None:
+            streamers = []
 
         if slug in self.devices:
             raise ValueError("Attempted to add a duplicate device slug: %s" % slug)
