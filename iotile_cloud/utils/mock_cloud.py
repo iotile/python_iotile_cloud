@@ -638,7 +638,7 @@ class MockIOTileCloud(object):
 
 @pytest.fixture(scope="module")
 def mock_cloud():
-    """A Mock iotile.cloud instance for testing."""
+    """A Mock iotile.cloud instance for testing with ssl."""
 
     cloud = MockIOTileCloud()
 
@@ -669,7 +669,18 @@ def mock_cloud_nossl():
 
 
 @pytest.fixture(scope="function")
-def mock_cloud_private(mock_cloud_nossl):
+def mock_cloud_private(mock_cloud):
+    """A Mock cloud instance that is reset after each test function with ssl."""
+
+    domain, cloud = mock_cloud
+
+    cloud.reset()
+    yield domain, cloud
+    cloud.reset()
+
+
+@pytest.fixture(scope="function")
+def mock_cloud_private_nossl(mock_cloud_nossl):
     """A Mock cloud instance that is reset after each test function without ssl."""
 
     domain, cloud = mock_cloud_nossl
