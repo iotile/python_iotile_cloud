@@ -1,0 +1,105 @@
+{
+    "name": "Water Meter Volume",
+    "slug": "water-meter-volume",
+    "available_input_units": [
+        {
+            "slug": "in--water-meter-volume--acre-feet",
+            "unit_full": "Acre Feet",
+            "unit_short": "A.F.",
+            "m": 123348185,
+            "d": 100,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-volume--cubic-meters",
+            "unit_full": "Cubic Meters",
+            "unit_short": "M^3",
+            "m": 1000,
+            "d": 1,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-volume--gallons",
+            "unit_full": "Gallons",
+            "unit_short": "G",
+            "m": 378541,
+            "d": 100000,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-volume--liters",
+            "unit_full": "Liters",
+            "unit_short": "L",
+            "m": 1,
+            "d": 1,
+            "o": 0.0
+        }
+    ],
+    "available_output_units": [
+        {
+            "slug": "out--water-meter-volume--acre-feet",
+            "unit_full": "Acre Feet",
+            "unit_short": "A.F.",
+            "m": 100,
+            "d": 123348185,
+            "o": 0.0,
+            "decimal_places": 0,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-volume--cubic-meters",
+            "unit_full": "Cubic Meters",
+            "unit_short": "M^3",
+            "m": 1,
+            "d": 1000,
+            "o": 0.0,
+            "decimal_places": 0,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-volume--gallons",
+            "unit_full": "Gallons",
+            "unit_short": "G",
+            "m": 100000,
+            "d": 378541,
+            "o": 0.0,
+            "decimal_places": 0,
+            "derived_units": {
+                "rate": {
+                    "gpm": {
+                        "m": 1,
+                        "d": 10
+                    },
+                    "gph": {
+                        "m": 6,
+                        "d": 1
+                    }
+                }
+            }
+        },
+        {
+            "slug": "out--water-meter-volume--liters",
+            "unit_full": "Liters",
+            "unit_short": "L",
+            "m": 1,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 0,
+            "derived_units": {
+                "rate": {
+                    "lpm": {
+                        "m": 1,
+                        "d": 10
+                    },
+                    "lph": {
+                        "m": 6,
+                        "d": 1
+                    }
+                }
+            }
+        }
+    ],
+    "decoder": null,
+    "storage_units_full": "Liter",
+    "storage_units_short": ""
+}

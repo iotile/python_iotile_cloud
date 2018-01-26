@@ -1,0 +1,29 @@
+{
+    "name": "Default",
+    "slug": "default",
+    "available_input_units": [
+        {
+            "slug": "in--default--unit",
+            "unit_full": "Unit",
+            "unit_short": "",
+            "m": 1,
+            "d": 1,
+            "o": 0.0
+        }
+    ],
+    "available_output_units": [
+        {
+            "slug": "out--default--unit",
+            "unit_full": "Unit",
+            "unit_short": "",
+            "m": 1,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        }
+    ],
+    "decoder": null,
+    "storage_units_full": "Unit",
+    "storage_units_short": ""
+}

@@ -1,0 +1,93 @@
+{
+    "name": "Water Meter Flow",
+    "slug": "water-meter-flow",
+    "available_input_units": [
+        {
+            "slug": "in--water-meter-flow--acre-feet",
+            "unit_full": "Acre Feet",
+            "unit_short": "A.F.",
+            "m": 123348185,
+            "d": 6553600,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-flow--cubic-meters",
+            "unit_full": "Cubic Meters",
+            "unit_short": "M^3",
+            "m": 1000,
+            "d": 65536,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-flow--gallons",
+            "unit_full": "Gallons",
+            "unit_short": "G",
+            "m": 3785,
+            "d": 65536000,
+            "o": 0.0
+        },
+        {
+            "slug": "in--water-meter-flow--liters",
+            "unit_full": "Liters",
+            "unit_short": "L",
+            "m": 1,
+            "d": 65536,
+            "o": 0.0
+        }
+    ],
+    "available_output_units": [
+        {
+            "slug": "out--water-meter-flow--cubic-meters-per-hr",
+            "unit_full": "Cubic Meters per Hr",
+            "unit_short": "M^3/H",
+            "m": 60,
+            "d": 1000,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-flow--gallons-per-hr",
+            "unit_full": "Gallons per Hr",
+            "unit_short": "GPH",
+            "m": 6000000,
+            "d": 378541,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-flow--gallons-per-min",
+            "unit_full": "Gallons per Min",
+            "unit_short": "GPM",
+            "m": 100000,
+            "d": 378541,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-flow--liters-per-hr",
+            "unit_full": "Liters per Hr",
+            "unit_short": "LPH",
+            "m": 60,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--water-meter-flow--liters-per-min",
+            "unit_full": "Liters per Min",
+            "unit_short": "LPM",
+            "m": 1,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        }
+    ],
+    "decoder": null,
+    "storage_units_full": "LPM",
+    "storage_units_short": ""
+}
