@@ -1,4 +1,4 @@
-### v0.7.4 (2018-01-26)
+### v0.8.0 (2018-01-26)
 
   * Add utils.mock_cloud module to allow for testing python functions that depend on cloud apis
   * Register two pytest fixtures using the mock cloud: mock_cloud and mock_cloud_nossl

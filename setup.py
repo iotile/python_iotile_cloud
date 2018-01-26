@@ -15,7 +15,7 @@ setup(name='iotile_cloud',
         'iotile_cloud.stream'
     ],
     entry_points={
-        'pytest11': ['iotile-analytics = iotile_cloud.utils.mock_cloud']
+        'pytest11': ['mock_cloud = iotile_cloud.utils.mock_cloud']
     },
     install_requires=[
         'requests',
