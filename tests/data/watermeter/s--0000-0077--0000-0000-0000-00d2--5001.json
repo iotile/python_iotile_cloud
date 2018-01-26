@@ -1,0 +1,101 @@
+[
+	{
+        "type": "ITR",
+        "timestamp": "2017-04-11T20:37:29.608972Z",
+        "int_value": 100,
+        "value": 37854.1,
+        "display_value": "0",
+        "output_value": 0.030688817999227146,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T20:47:29.608972Z",
+        "int_value": 101,
+        "value": 38232.641,
+        "display_value": "0",
+        "output_value": 0.030995706179219422,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T20:57:29.608972Z",
+        "int_value": 99,
+        "value": 37475.559,
+        "display_value": "0",
+        "output_value": 0.030381929819234876,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:07:29.608972Z",
+        "int_value": 92,
+        "value": 34825.772,
+        "display_value": "0",
+        "output_value": 0.028233712559288974,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:17:29.608972Z",
+        "int_value": 90,
+        "value": 34068.69,
+        "display_value": "0",
+        "output_value": 0.027619936199304432,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:27:29.608972Z",
+        "int_value": 101,
+        "value": 38232.641,
+        "display_value": "0",
+        "output_value": 0.030995706179219422,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:37:25.972121Z",
+        "int_value": 100,
+        "value": 37854.1,
+        "display_value": "0",
+        "output_value": 0.030688817999227146,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:47:25.972121Z",
+        "int_value": 100,
+        "value": 37854.1,
+        "display_value": "0",
+        "output_value": 0.030688817999227146,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T21:57:25.972121Z",
+        "int_value": 100,
+        "value": 37854.1,
+        "display_value": "0",
+        "output_value": 0.030688817999227146,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T22:07:25.972121Z",
+        "int_value": 100,
+        "value": 37854.1,
+        "display_value": "0",
+        "output_value": 0.030688817999227146,
+        "streamer_local_id": null
+    },
+    {
+        "type": "ITR",
+        "timestamp": "2017-04-11T22:17:25.972121Z",
+        "int_value": 99,
+        "value": 37475.559,
+        "display_value": "0",
+        "output_value": 0.030381929819234876,
+        "streamer_local_id": null
+    }
+]

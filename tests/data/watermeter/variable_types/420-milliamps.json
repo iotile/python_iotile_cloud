@@ -1,0 +1,60 @@
+
+{
+    "name": "420 Milliamps",
+    "slug": "420-milliamps",
+    "available_input_units": [
+        {
+            "slug": "in--420-milliamps--milliamps",
+            "unit_full": "Milliamps",
+            "unit_short": "mA",
+            "m": 28,
+            "d": 4095,
+            "o": 0.0
+        }
+    ],
+    "available_output_units": [
+        {
+            "slug": "out--420-milliamps--0-100-psi",
+            "unit_full": "0-100 psi",
+            "unit_short": "psi",
+            "m": 100,
+            "d": 16,
+            "o": -25.0,
+            "decimal_places": 0,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--420-milliamps--0-200-psi",
+            "unit_full": "0-200 psi",
+            "unit_short": "psi",
+            "m": 200,
+            "d": 16,
+            "o": -50.0,
+            "decimal_places": 0,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--420-milliamps--0-4000-gpm",
+            "unit_full": "0-4000 GPM",
+            "unit_short": "gpm",
+            "m": 4000,
+            "d": 16,
+            "o": -1000.0,
+            "decimal_places": 0,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--420-milliamps--milliamps",
+            "unit_full": "Milliamps",
+            "unit_short": "mA",
+            "m": 1,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        }
+    ],
+    "decoder": null,
+    "storage_units_full": "Milliamps",
+    "storage_units_short": ""
+}

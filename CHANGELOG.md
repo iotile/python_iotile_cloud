@@ -1,3 +1,8 @@
+### v0.8.0 (2018-01-26)
+
+  * Add utils.mock_cloud module to allow for testing python functions that depend on cloud apis
+  * Register two pytest fixtures using the mock cloud: mock_cloud and mock_cloud_nossl
+
 ### v0.7.3 (2017-11-29)
 
   * Add utils.mdo.MdoHelper class to help with raw stream data conversions

@@ -1,0 +1,89 @@
+{
+    "name": "Temp",
+    "slug": "temp",
+    "available_input_units": [
+        {
+            "slug": "in--temp--10k-thermistor",
+            "unit_full": "10K-Thermistor",
+            "unit_short": "U",
+            "m": -2995,
+            "d": 146250,
+            "o": 323.1
+        },
+        {
+            "slug": "in--temp--gs3-decagon",
+            "unit_full": "GS3-Decagon",
+            "unit_short": "U",
+            "m": 1,
+            "d": 1000,
+            "o": 273.15
+        },
+        {
+            "slug": "in--temp--lansmont-saver",
+            "unit_full": "Lansmont Saver",
+            "unit_short": "C",
+            "m": 1,
+            "d": 1000000,
+            "o": 273.15
+        },
+        {
+            "slug": "in--temp--lm35",
+            "unit_full": "LM35",
+            "unit_short": "mA",
+            "m": 280,
+            "d": 4095,
+            "o": 273.15
+        },
+        {
+            "slug": "in--temp--pod1-m",
+            "unit_full": "POD1-M",
+            "unit_short": "C",
+            "m": 1,
+            "d": 100,
+            "o": 273.15
+        },
+        {
+            "slug": "in--temp--tmp36",
+            "unit_full": "TMP36",
+            "unit_short": "mA",
+            "m": 280,
+            "d": 4095,
+            "o": 223.15
+        }
+    ],
+    "available_output_units": [
+        {
+            "slug": "out--temp--celsius",
+            "unit_full": "Celsius",
+            "unit_short": "C",
+            "m": 1,
+            "d": 1,
+            "o": -273.15,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--temp--fahrenheit",
+            "unit_full": "Fahrenheit",
+            "unit_short": "F",
+            "m": 9,
+            "d": 5,
+            "o": -459.67,
+            "decimal_places": 1,
+            "derived_units": {}
+        },
+        {
+            "slug": "out--temp--kelvin",
+            "unit_full": "Kelvin",
+            "unit_short": "K",
+            "m": 1,
+            "d": 1,
+            "o": 0.0,
+            "decimal_places": 1,
+            "derived_units": {}
+        }
+    ],
+    "decoder": null,
+    "storage_units_full": "Kelvin",
+    "storage_units_short": ""
+}

@@ -1,0 +1,438 @@
+{
+	"devices":
+	[
+		{
+		    "id": 210,
+		    "slug": "d--0000-0000-0000-00d2",
+		    "gid": "0000-0000-0000-00d2",
+		    "label": "Filtration Flow",
+		    "active": true,
+		    "external_id": "",
+		    "sg": "water-meter-v1-1-0",
+		    "template": "1d1p2bt101es-v2-0-0",
+		    "org": "test_org",
+		    "project": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+		    "lat": null,
+		    "lon": null,
+		    "created_on": "2017-01-11T03:39:14.394521Z",
+		    "claimed_by": "test",
+		    "claimed_on": null
+		}
+	],
+
+    "datablocks":
+	[
+		{
+		    "id": 210,
+		    "slug": "b--0001-0000-0000-04e7",
+            "title": "Archive: POD1-M (04e7)",
+            "description": "test data",
+            "block": 3,
+            "org": "Acme",
+            "sg": "shipping-v1-0-0",
+            "created_on": "2017-11-30T18:32:49.804691Z",
+            "created_by": "user1"
+		}
+	],
+
+    "properties":
+    [
+        {
+            "id": 1,
+            "name": "CargoDescription",
+            "value": "SO# 83469",
+            "type": "str",
+            "is_system": false,
+            "target": "d--0000-0000-0000-00d2"
+        },
+        {
+            "id": 2,
+            "name": "Country",
+            "value": "KOREA",
+            "type": "str",
+            "is_system": false,
+            "target": "d--0000-0000-0000-00d2"
+        }
+    ],
+
+	"streams":
+	[
+		{
+            "id": "ee188d65-2f19-4016-aa94-1cfce18f4a31",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "IO 1",
+            "variable": "v--0000-0077--100b",
+            "var_type": "water-meter-flow",
+            "var_name": "Pulse 1",
+            "var_lid": 4107,
+            "input_unit": {
+                "slug": "in--water-meter-flow--gallons",
+                "unit_full": "Gallons",
+                "unit_short": "G",
+                "m": 3785,
+                "d": 65536000,
+                "o": 0.0
+            },
+            "output_unit": {
+                "slug": "out--water-meter-flow--gallons-per-min",
+                "unit_full": "Gallons per Min",
+                "unit_short": "GPM",
+                "m": 100000,
+                "d": 378541,
+                "o": 0.0,
+                "decimal_places": 1,
+                "derived_units": {}
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 100,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.069800Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--100b",
+            "enabled": true
+        },
+        {
+            "id": "def98876-9c24-499b-a825-8413940f09d2",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "",
+            "variable": "v--0000-0077--100c",
+            "var_type": "water-meter-flow",
+            "var_name": "Pulse 2",
+            "var_lid": 4108,
+            "input_unit": {
+                "slug": "in--water-meter-flow--acre-feet",
+                "unit_full": "Acre Feet",
+                "unit_short": "A.F.",
+                "m": 123348185,
+                "d": 6553600,
+                "o": 0.0
+            },
+            "output_unit": {
+                "unit_short": "GPM",
+                "unit_full": "Gallons per Min",
+                "decimal_places": 1,
+                "m": 100000,
+                "derived_units": {},
+                "o": 0.0,
+                "d": 378541,
+                "slug": "out--water-meter-flow--gallons-per-min"
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 1,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.085349Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--100c",
+            "enabled": true
+        },
+        {
+            "id": "995f126e-d5f5-4b13-97bc-cdd956deb86d",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "IO 1",
+            "variable": "v--0000-0077--100d",
+            "var_type": "water-meter-volume",
+            "var_name": "Odometer 1",
+            "var_lid": 4109,
+            "input_unit": {
+                "slug": "in--water-meter-volume--gallons",
+                "unit_full": "Gallons",
+                "unit_short": "G",
+                "m": 378541,
+                "d": 100000,
+                "o": 0.0
+            },
+            "output_unit": {
+                "slug": "out--water-meter-volume--acre-feet",
+                "unit_full": "Acre Feet",
+                "unit_short": "A.F.",
+                "m": 100,
+                "d": 123348185,
+                "o": 0.0,
+                "decimal_places": 0,
+                "derived_units": {}
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 100,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.114488Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--100d",
+            "enabled": true
+        },
+        {
+            "id": "506608ec-6970-43f8-baca-dd5db4edd933",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "",
+            "variable": "v--0000-0077--100e",
+            "var_type": "water-meter-volume",
+            "var_name": "Odometer 2",
+            "var_lid": 4110,
+            "input_unit": {
+                "slug": "in--water-meter-volume--acre-feet",
+                "unit_full": "Acre Feet",
+                "unit_short": "A.F.",
+                "m": 123348185,
+                "d": 100,
+                "o": 0.0
+            },
+            "output_unit": {
+                "unit_short": "A.F.",
+                "unit_full": "Acre Feet",
+                "decimal_places": 0,
+                "m": 100,
+                "derived_units": {},
+                "o": 0.0,
+                "d": 123348185,
+                "slug": "out--water-meter-volume--acre-feet"
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 1,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.129697Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--100e",
+            "enabled": true
+        },
+        {
+            "id": "2cc372bd-8cdb-4499-be2d-5ba838d69435",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "",
+            "variable": "v--0000-0077--1011",
+            "var_type": "420-milliamps",
+            "var_name": "Sensor 1",
+            "var_lid": 4113,
+            "input_unit": {
+                "slug": "in--420-milliamps--milliamps",
+                "unit_full": "Milliamps",
+                "unit_short": "mA",
+                "m": 28,
+                "d": 4095,
+                "o": 0.0
+            },
+            "output_unit": {
+                "slug": "out--420-milliamps--milliamps",
+                "unit_full": "Milliamps",
+                "unit_short": "mA",
+                "m": 1,
+                "d": 1,
+                "o": 0.0,
+                "decimal_places": 1,
+                "derived_units": {}
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "V",
+            "mdo_label": "",
+            "multiplication_factor": null,
+            "division_factor": null,
+            "offset": null,
+            "org": "test",
+            "created_on": "2017-03-28T22:36:49.251793Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--1011",
+            "enabled": true
+        },
+        {
+            "id": "8c991478-f8ba-4743-9b38-ee787c9db55d",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "IO 1",
+            "variable": "v--0000-0077--5001",
+            "var_type": "water-meter-volume",
+            "var_name": "IO 1",
+            "var_lid": 20481,
+            "input_unit": {
+                "m": 378541,
+                "o": 0.0,
+                "d": 100000,
+                "unit_full": "Gallons",
+                "unit_short": "G",
+                "slug": "in--water-meter-volume--gallons"
+            },
+            "output_unit": {
+                "unit_short": "A.F.",
+                "unit_full": "Acre Feet",
+                "decimal_places": 0,
+                "m": 100,
+                "derived_units": {},
+                "o": 0.0,
+                "d": 123348185,
+                "slug": "out--water-meter-volume--acre-feet"
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 100,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.037746Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--5001",
+            "enabled": true
+        },
+        {
+            "id": "dfe4b528-5392-401a-a68f-c4f346dd59c1",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "Filtration Flow",
+            "variable": "v--0000-0077--5002",
+            "var_type": "water-meter-volume",
+            "var_name": "IO 2",
+            "var_lid": 20482,
+            "input_unit": {
+                "m": 123348185,
+                "o": 0.0,
+                "d": 100,
+                "unit_full": "Acre Feet",
+                "unit_short": "A.F.",
+                "slug": "in--water-meter-volume--acre-feet"
+            },
+            "output_unit": {
+                "unit_short": "A.F.",
+                "unit_full": "Acre Feet",
+                "decimal_places": 0,
+                "m": 100,
+                "derived_units": {},
+                "o": 0.0,
+                "d": 123348185,
+                "slug": "out--water-meter-volume--acre-feet"
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "S",
+            "mdo_label": "",
+            "multiplication_factor": 1,
+            "division_factor": 1,
+            "offset": 0.0,
+            "org": "test",
+            "created_on": "2017-03-28T22:34:36.054257Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--5002",
+            "enabled": false
+        },
+        {
+            "id": "5836d561-93f7-45d2-9c94-6f299b96ca0c",
+            "project_id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "project": "p--0000-0077",
+            "device": "d--0000-0000-0000-00d2",
+            "block": null,
+            "data_label": "",
+            "variable": "v--0000-0077--5005",
+            "var_type": "420-milliamps",
+            "var_name": "IO 5",
+            "var_lid": 20485,
+            "input_unit": {
+                "m": 28,
+                "o": 0.0,
+                "d": 4095,
+                "unit_full": "Milliamps",
+                "unit_short": "mA",
+                "slug": "in--420-milliamps--milliamps"
+            },
+            "output_unit": {
+                "unit_short": "mA",
+                "unit_full": "Milliamps",
+                "decimal_places": 1,
+                "m": 1,
+                "derived_units": {},
+                "o": 0.0,
+                "d": 1,
+                "slug": "out--420-milliamps--milliamps"
+            },
+            "derived_stream": null,
+            "raw_value_format": "<L",
+            "mdo_type": "V",
+            "mdo_label": "",
+            "multiplication_factor": null,
+            "division_factor": null,
+            "offset": null,
+            "org": "test",
+            "created_on": "2017-03-28T22:36:49.236362Z",
+            "slug": "s--0000-0077--0000-0000-0000-00d2--5005",
+            "enabled": true
+        }
+    ],
+
+    "projects":
+    [
+        {
+            "id": "1c07fdd0-3fad-4549-bd56-5af2aca18d5b",
+            "name": "Irrigation Project",
+            "slug": "p--0000-0077",
+            "gid": "0000-0077",
+            "org": "test",
+            "about": "",
+            "project_template": "water-meter-v1-1-0",
+            "created_on": "2017-03-23T00:19:15.335751Z",
+            "created_by": "test"
+        }
+    ],
+
+    "events":
+    [
+        {
+            "id": 1,
+            "stream": "s--0000-0077--0000-0000-0000-00d2--5001",
+            "timestamp": "2016-06-23T10:58:31Z",
+            "has_raw_data": true,
+            "extra_data": 
+            {
+                "meta": "hello"
+            }
+        },
+        {
+            "id": 2,
+            "stream": "s--0000-0077--0000-0000-0000-00d2--5001",
+            "timestamp": "2016-06-23T10:59:31Z",
+            "has_raw_data": true,
+            "extra_data":
+            {
+                "meta": "goodbye"
+            }
+        },
+        {
+            "id": 3,
+            "stream": "s--0000-0077--0000-0000-0000-00d2--5001",
+            "timestamp": "2016-06-23T11:00:31Z",
+            "has_raw_data": false,
+            "extra_data":
+            {
+                "meta": "no_data"
+            }
+        }
+    ]
+}
