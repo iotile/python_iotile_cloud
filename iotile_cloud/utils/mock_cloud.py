@@ -29,12 +29,13 @@ import logging
 import uuid
 import iotile_cloud.utils.gid as gid
 
+HAS_DEPENDENCIES = True
 try:
     import pytest
     from pytest_localserver.http import WSGIServer
     from werkzeug.wrappers import Request, Response
 except ImportError:
-    raise RuntimeError("You must have pytest and pytest_localserver installed to be able to use MockIOTileCloud")
+    HAS_DEPENDENCIES = False
 
 
 class ErrorCode(Exception):
@@ -50,6 +51,9 @@ class MockIOTileCloud(object):
     DEFAULT_ORG_SLUG = 'quick-test-org'
 
     def __init__(self, config_file=None):
+        if not HAS_DEPENDENCIES:
+            raise RuntimeError("You must have pytest and pytest_localserver installed to be able to use MockIOTileCloud")
+
         self.logger = logging.getLogger(__name__)
 
         self._config_file = config_file

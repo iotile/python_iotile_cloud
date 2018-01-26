@@ -1,3 +1,8 @@
+### v0.8.1 (2018-01-26)
+
+  * Fix import error that broke pytest if you did not have pytest-localserver
+    installed, even if you didn't try to use mock_cloud.
+
 ### v0.8.0 (2018-01-26)
 
   * Add utils.mock_cloud module to allow for testing python functions that depend on cloud apis
