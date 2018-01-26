@@ -191,7 +191,7 @@ class MockIOTileCloud(object):
         if 'project' in request.args:
             results = [x for x in self.devices.values() if x['project'] == request.args['project']]
         else:
-            results = self.devices.values()
+            results = [x for x in self.devices.values()]
 
         return self._paginate(results, request, 100)
 
@@ -204,7 +204,7 @@ class MockIOTileCloud(object):
             slug = request.args['device']
             results = [self.fleets[key] for key, value in self.fleet_members.items() if slug in value]
         else:
-            results = self.fleets.values()
+            results = [x for x in self.fleets.values()]
 
         return self._paginate(results, request, 100)
 

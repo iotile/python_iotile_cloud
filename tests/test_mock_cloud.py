@@ -207,4 +207,4 @@ def test_quick_add_fleet(mock_cloud_private_nossl):
 
     # Make sure we can get all devices in a fleet
     res = api.fleet(fleet).devices.get()
-    assert len(res) == 3
+    assert len(res['results']) == 3
