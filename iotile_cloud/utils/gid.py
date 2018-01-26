@@ -141,7 +141,7 @@ class IOTileStreamerSlug(IOTileCloudSlug):
         elif isinstance(device, str):
             device_id = IOTileDeviceSlug(device).get_id()
         else:
-            raise ValueError("Unknwon device specifier, must be string, int or IOTileDeviceSlug")
+            raise ValueError("Unknown device specifier, must be string, int or IOTileDeviceSlug")
 
         index = int(index)
 
