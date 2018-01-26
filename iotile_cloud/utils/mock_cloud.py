@@ -68,6 +68,8 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/datablock/(b--[0-9\-a-f]+)/", lambda x, y: self.one_object('datablocks', x, y))
         self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/", lambda x, y: self.one_object('streams', x, y))
         self._add_api(r"/api/v1/streamer/(t--[0-9\-a-f]+)/", lambda x, y: self.one_object('streamers', x, y))
+        self._add_api(r"/api/v1/fleet/(g--[0-9\-a-f]+)/devices/", self.get_fleet_members)
+        self._add_api(r"/api/v1/fleet/(g--[0-9\-a-f]+)/", lambda x, y: self.one_object('fleets', x, y))
         self._add_api(r"/api/v1/project/([0-9\-a-f]+)/", lambda x, y: self.one_object('projects', x, y))
         self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
         self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
@@ -78,6 +80,7 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/property/", self.list_properties)
         self._add_api(r"/api/v1/streamer/", self.list_streamers)
         self._add_api(r"/api/v1/device/", self.list_devices)
+        self._add_api(r"/api/v1/fleet/", self.list_fleets)
 
     def reset(self):
         """Clear any stored data in in this cloud as if we created a new instance."""
@@ -92,6 +95,8 @@ class MockIOTileCloud(object):
         self.properties = {}
         self.projects = {}
         self.orgs = {}
+        self.fleets = {}
+        self.fleet_members = {}
         self.streamers = {}
 
         self.events = {}
@@ -145,6 +150,15 @@ class MockIOTileCloud(object):
 
         return vartype
 
+    def get_fleet_members(self, request, slug):
+        if slug not in self.fleets:
+            raise ErrorCode(404)
+
+        members = self.fleet_members[slug]
+        results = [{'device': x[0], 'is_access_point': x[1], 'always_on': x[2]} for x in members.values()]
+
+        return self._paginate(results, request, 100)
+
     def one_object(self, obj_type, request, obj_id):
         """Handle /<object>/<slug>/ GET."""
 
@@ -178,6 +192,19 @@ class MockIOTileCloud(object):
             results = [x for x in self.devices.values() if x['project'] == request.args['project']]
         else:
             results = self.devices.values()
+
+        return self._paginate(results, request, 100)
+
+    def list_fleets(self, request):
+        """List and possibly filter fleets."""
+
+        results = []
+
+        if 'device' in request.args:
+            slug = request.args['device']
+            results = [self.fleets[key] for key, value in self.fleet_members.items() if slug in value]
+        else:
+            results = self.fleets.values()
 
         return self._paginate(results, request, 100)
 
@@ -401,7 +428,8 @@ class MockIOTileCloud(object):
 
         slug_types = {
             'p': gid.IOTileProjectSlug,
-            'd': gid.IOTileDeviceSlug
+            'd': gid.IOTileDeviceSlug,
+            'g': gid.IOTileFleetSlug
         }
 
         slug_obj = slug_types.get(slug_type)
@@ -636,6 +664,82 @@ class MockIOTileCloud(object):
         }
 
         self.streamers[streamer_slug] = streamer_data
+
+    def quick_add_fleet(self, devices, is_network=False, fleet_slug=None, org_slug=None):
+        """Quickly add a fleet.
+
+        A fleet is a group of devices.  A device can be in many fleets.  Fleets have a 
+        single property, is_network which determines whether they should be considered
+        for gateway management.  
+
+        You should create a fleet with a list of devices.  For each device you can
+        pass either an integer id, slug of IOTileDeviceSlug object.  If you want to
+        mark the device as an access point for the fleet, you can pass a tuple
+        with (id_like, access_point, always_on) instead of just an id_like for that device.
+        If you don't pass access point, it defaults to False.  If you don't pass always_on
+        it defaults to True. 
+
+        Args:
+            device (list of id_like or (id_like, bool)): A list of the devices that should
+                be in this network.  You need to pass an id_like which can be an integer,
+                string of IOTileDeviceSlug object.  If you want to mark the device as an
+                access_point for the fleet, pass a tuple with (id_like, True) for that
+                entry of the list.
+            is_network (bool): Whether this fleet should be considered for gateway management
+                or if its just a group of devices.
+            fleet_slug (str, int or IOTileFleetSlug): An optional explicit slug for the fleet.
+            org_slug (str): An optional explicit slug for the owning org of the fleet.  If
+                not specified, it defaults to DEFAULT_ORG_SLUG.
+
+        Returns:
+            str: The slug of the newly created fleet.
+        """
+
+        device_entries = []
+        for dev in devices:
+            access = False
+            always_on = True
+            if isinstance(dev, tuple):
+                if len(dev) == 2:
+                    dev, access = dev
+                elif len(dev) == 3:
+                    dev, access, always_on = dev
+                else:
+                    raise ValueError("Invalid tuple for device that does not contain 2 or 3 items")
+
+            dev_slug_obj = gid.IOTileDeviceSlug(dev)
+            dev_slug = str(dev_slug_obj)
+            if dev_slug not in self.devices:
+                raise ValueError("Unknown device specified in fleet, slug: %s" % dev_slug)
+
+            device_entries.append((str(dev_slug), access, always_on))
+
+        if fleet_slug is None:
+            fleet_slug, _unused = self._find_unique_slug('g', set(self.fleets.keys()))
+
+        if fleet_slug in self.fleets:
+            raise ValueError("Fleet already exists with given slug: %s" % fleet_slug)
+
+        if org_slug is None:
+            org_slug = self._ensure_quicktest_org()
+
+        if org_slug not in self.orgs:
+            raise ValueError("Unkown org slug specified for fleet, slug: %s" % org_slug)
+
+        fleet_data = {
+            "id": len(self.fleets) + 1,
+            "name": "Unnamed Fleet %d" % (len(self.fleets) + 1,),
+            "slug": fleet_slug,
+            "org": org_slug,
+            "description": "",
+            "created_on": self._fixed_utc_timestr(),
+            "created_by": "quick_test_user",
+            "is_network": bool(is_network)
+        }
+
+        self.fleets[fleet_slug] = fleet_data
+        self.fleet_members[fleet_slug] = {x[0]: x for x in device_entries}
+        return fleet_slug
 
     def _fixed_utc_timestr(self):
         """Create an unchanging utc timestring that is timezone aware."""

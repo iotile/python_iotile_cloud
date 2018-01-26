@@ -8,6 +8,7 @@ int2did = lambda n: int48gid(n)
 int2pid = lambda n: int32gid(n)
 int2vid = lambda n: int16gid(n)
 int2bid = lambda n: int16gid(n)
+int2fid = lambda n: int48gid(n)
 
 gid_split = lambda val: val.split('--')
 
@@ -46,10 +47,10 @@ class IOTileCloudSlug(object):
         return gid_join(parts[1:])
 
     def set_from_single_id_slug(self, type, terms, id):
-        assert(type in ['p', 'd', 'b'])
+        assert(type in ['p', 'd', 'b', 'g'])
         assert (isinstance(id, str))
         parts = gid_split(id)
-        if parts[0] in ['p', 'd', 'b']:
+        if parts[0] in ['p', 'd', 'b', 'g']:
             id = parts[1]
         id = fix_gid(id, terms)
         self._slug = gid_join([type, id])
@@ -57,7 +58,7 @@ class IOTileCloudSlug(object):
     def get_id(self):
         parts = gid_split(self._slug)
         assert(len(parts) == 2)
-        assert(parts[0] in ['p', 'd'])
+        assert(parts[0] in ['p', 'd', 'g'])
         return gid2int(parts[1])
 
 
@@ -76,11 +77,26 @@ class IOTileDeviceSlug(IOTileCloudSlug):
     """Formatted Global Device ID: d--0000-0000-0000-0001"""
 
     def __init__(self, id):
+        if isinstance(id, IOTileDeviceSlug):
+            self._slug = id._slug
+            return
+
         if isinstance(id, int):
-            did = int2did(id)
+            did = int2did(id)    
         else:
             did = id
         self.set_from_single_id_slug('d', 4, did)
+
+
+class IOTileFleetSlug(IOTileCloudSlug):
+    """Formatted Global Fleet ID: g--0000-0000-0001"""
+
+    def __init__(self, id):
+        if isinstance(id, int):
+            fid = int2fid(id)
+        else:
+            fid = id
+        self.set_from_single_id_slug('g', 3, fid)
 
 
 class IOTileBlockSlug(IOTileCloudSlug):

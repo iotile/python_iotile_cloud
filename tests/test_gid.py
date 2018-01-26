@@ -32,6 +32,8 @@ class GIDTestCase(unittest.TestCase):
 
         id = IOTileDeviceSlug('d--0000-0000-0000-1234')
         self.assertEqual(str(id), 'd--0000-0000-0000-1234')
+        id = IOTileDeviceSlug(id)
+        self.assertEqual(str(id), 'd--0000-0000-0000-1234')
 
         id = IOTileDeviceSlug('d--1234')
         self.assertEqual(str(id), 'd--0000-0000-0000-1234')
@@ -154,3 +156,10 @@ def test_streamer_gid():
     assert str(s_gid) == "t--0000-0000-0000-000f--0000"
     assert s_gid.get_device() == str(d_gid)
     assert s_gid.get_index() == "0000"
+
+
+def test_fleet_gid():
+    """Ensure that IOTileFleetSlug works."""
+
+    f_gid = IOTileFleetSlug(1)
+    assert str(f_gid) == 'g--0000-0000-0001'

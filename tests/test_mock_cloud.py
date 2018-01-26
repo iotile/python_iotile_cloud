@@ -145,7 +145,6 @@ def test_list_devices(mock_cloud_private_nossl):
 
     domain, cloud = mock_cloud_private_nossl
     api = Api(domain=domain)
-
     cloud.quick_add_user('test@arch-iot.com', 'test')
     api.login('test', 'test@arch-iot.com')
 
@@ -161,15 +160,52 @@ def test_list_devices(mock_cloud_private_nossl):
     res = api.device.get()
     assert len(res['results']) == 5
 
-    print(proj_id1)
-    print(proj_id2)
-
     res = api.device.get(project=proj_id1)
     devs = set([x['slug'] for x in res['results']])
-    print(devs)
     assert device_slug1_1 in devs and device_slug1_2 in devs and len(devs) == 2
 
     res = api.device.get(project=proj_id2)
     devs = set([x['slug'] for x in res['results']])
-    print(res)
     assert device_slug2_1 in devs and device_slug2_2 in devs and device_slug2_3 in devs and len(devs) == 3
+
+
+def test_quick_add_fleet(mock_cloud_private_nossl):
+    """Make sure we can add, list and filter fleets."""
+
+    domain, cloud = mock_cloud_private_nossl
+    api = Api(domain=domain)
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    api.login('test', 'test@arch-iot.com')
+
+    proj, _slug = cloud.quick_add_project()
+    dev1 = cloud.quick_add_device(proj, 1)
+    dev2 = cloud.quick_add_device(proj)
+    dev3 = cloud.quick_add_device(proj)
+    dev4 = cloud.quick_add_device(proj)
+    
+    fleet = cloud.quick_add_fleet([1, (dev2, False, False), (dev3, True)], True)
+    fleet2 = cloud.quick_add_fleet([dev2])
+
+    # Make sure we can list
+    res = api.fleet.get()
+    assert len(res['results']) == 2
+
+    # Make sure we can get a single fleet
+    fleet_data = api.fleet(fleet).get()
+    assert fleet_data == cloud.fleets[fleet]
+
+    # Make sure we can get all fleets containing a device
+    res = api.fleet().get(device=dev1)
+    assert len(res['results']) == 1
+    assert res['results'][0]['slug'] == fleet
+
+    res = api.fleet().get(device=dev4)
+    assert len(res['results']) == 0
+
+    res = api.fleet().get(device=dev2)
+    assert len(res['results']) == 2
+
+    # Make sure we can get all devices in a fleet
+    res = api.fleet(fleet).devices.get()
+    print(res)
+    assert len(res) == 3
