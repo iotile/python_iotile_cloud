@@ -45,6 +45,16 @@ class ErrorCode(Exception):
         self.status = code
 
 
+class JSONErrorCode(Exception):
+    """A non 200 response with JSON data."""
+
+    def __init__(self, data, code):
+        super(ErrorCode, self.__init__())
+
+        self.status = code
+        self.data = data
+
+
 class MockIOTileCloud(object):
     """A test instance of IOTile.cloud for continuous integration."""
 
@@ -182,14 +192,17 @@ class MockIOTileCloud(object):
 
         if len(request.files) != 1:
             print("Invalid upload that should contain a single binary file, files=%s" % request.files)
-            raise ErrorCode(500)
+            raise JSONErrorCode({'error': 'missing request.data[\'file\']'}, 400)
+
+        if 'timestamp' not in request.args:
+            raise JSONErrorCode({'error': 'missing timestamp argument'}, 400)
 
         infile = request.files['file']
         indata = infile.read()
 
         if len(indata) < (20 + 16):
             print("Invalid input data length, too short, length=%d" % len(indata))
-            raise ErrorCode(500)
+            raise ErrorCode({'error': 'invalid file length'}, 400)
 
         inheader = indata[:20]
         infooter = indata[-24:]
@@ -236,7 +249,7 @@ class MockIOTileCloud(object):
         self.reports[report_record['id']] = report_record
         self.raw_report_files[report_record['id']] = indata
 
-        return {}
+        return {'count': (length - 24 - 20) // 16}
 
     def _get_streamer_ack(self, device_id, index):
         streamer = str(gid.IOTileStreamerSlug(device_id, index))
@@ -469,16 +482,26 @@ class MockIOTileCloud(object):
                 continue
 
             groups = res.groups()
-            response_headers = [(b'Content-type', b'application/json')]
 
             try:
                 data = callback(req, *groups)
                 if data is None:
                     data = {}
 
+                response_headers = [(b'Content-type', b'application/json')]
                 resp = json.dumps(data)
-
                 resp = Response(resp.encode('utf-8'), status=200, headers=response_headers)
+                return resp(environ, start_response)
+            except JSONErrorCode as err:
+                self.error_count += 1
+
+                data = err.data
+                if data is None:
+                    data = {}
+
+                resp = json.dumps(data)
+                response_headers = [(b'Content-type', b'application/json')]
+                resp = Response(resp.encode('utf-8'), status=err.status, headers=response_headers)
                 return resp(environ, start_response)
             except ErrorCode as err:
                 self.error_count += 1
@@ -489,6 +512,7 @@ class MockIOTileCloud(object):
 
         self.error_count += 1
 
+        response_headers = [(b'Content-type', b'text/plain')]
         resp = Response(b"Page not found.", status=404, headers=response_headers)
         return resp(environ, start_response)
 

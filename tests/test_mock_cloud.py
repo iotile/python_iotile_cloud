@@ -238,7 +238,11 @@ def test_upload_report(mock_cloud_private_nossl):
     assert len(resp['results']) == 0
 
     resp = requests.post(resource.url(), files=payload, headers=headers, params={'timestamp': timestamp})
+    resp = resource._process_response(resp)
     
+    # Verify that the response contains a count record
+    assert resp['count'] == 100
+
     # Verify the streamer record exists
     resp = api.streamer('t--0000-0000-0000-000a--0001').get()
     assert resp['last_id'] == 100
@@ -252,3 +256,4 @@ def test_upload_report(mock_cloud_private_nossl):
     report = api.streamer.report(rep_id).get()
     assert report['id'] == rep_id
     assert cloud.raw_report_files[rep_id] == data
+
