@@ -27,6 +27,7 @@ import datetime
 import csv
 import logging
 import uuid
+import struct
 import iotile_cloud.utils.gid as gid
 
 HAS_DEPENDENCIES = True
@@ -42,6 +43,16 @@ class ErrorCode(Exception):
     def __init__(self, code):
         super(ErrorCode, self).__init__()
         self.status = code
+
+
+class JSONErrorCode(Exception):
+    """A non 200 response with JSON data."""
+
+    def __init__(self, data, code):
+        super(ErrorCode, self.__init__())
+
+        self.status = code
+        self.data = data
 
 
 class MockIOTileCloud(object):
@@ -75,8 +86,12 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/fleet/(g--[0-9\-a-f]+)/devices/", self.get_fleet_members)
         self._add_api(r"/api/v1/fleet/(g--[0-9\-a-f]+)/", lambda x, y: self.one_object('fleets', x, y))
         self._add_api(r"/api/v1/project/([0-9\-a-f]+)/", lambda x, y: self.one_object('projects', x, y))
+        self._add_api(r"/api/v1/streamer/report/([0-9\-a-f]+)/", lambda x, y: self.one_object('reports', x, y))
         self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
         self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
+
+        # APIs for posting data
+        self._add_api(r"/api/v1/streamer/report/", self.handle_report_api)
 
         # APIs for listing models
         self._add_api(r"/api/v1/stream/", self.list_streams)
@@ -102,6 +117,8 @@ class MockIOTileCloud(object):
         self.fleets = {}
         self.fleet_members = {}
         self.streamers = {}
+        self.reports = {}
+        self.raw_report_files = {}
 
         self.events = {}
 
@@ -162,6 +179,85 @@ class MockIOTileCloud(object):
         results = [{'device': x[0], 'is_access_point': x[1], 'always_on': x[2]} for x in members.values()]
 
         return self._paginate(results, request, 100)
+
+    def handle_report_api(self, request):
+        """Handle /streamer/report/ api."""
+
+        if request.method == "GET":
+            results = [x for x in self.reports.values()]
+            return self._paginate(results, request, 100)
+        elif request.method != 'POST':
+            print("Invalid request on /streamer/report/ only post and get supported, got %s" % request.method)
+            raise ErrorCode(500)
+
+        if len(request.files) != 1:
+            print("Invalid upload that should contain a single binary file, files=%s" % request.files)
+            raise JSONErrorCode({'error': 'missing request.data[\'file\']'}, 400)
+
+        if 'timestamp' not in request.args:
+            raise JSONErrorCode({'error': 'missing timestamp argument'}, 400)
+
+        infile = request.files['file']
+        indata = infile.read()
+
+        if len(indata) < (20 + 16):
+            print("Invalid input data length, too short, length=%d" % len(indata))
+            raise ErrorCode({'error': 'invalid file length'}, 400)
+
+        inheader = indata[:20]
+        infooter = indata[-24:]
+
+        lowest_id, highest_id = struct.unpack_from("<LL", infooter)
+        fmt, len_low, len_high, device_id, report_id, sent_timestamp, _signature_flags, origin_streamer, streamer_selector = struct.unpack("<BBHLLLBBH", inheader)
+
+        length = (len_high << 8) | len_low
+        if length != len(indata):
+            print("Invalid input data length, did not match, expected: %d, found: %d" % (length, len(indata)))
+            raise ErrorCode(500)
+
+        if fmt != 1:
+            print("Invalid report format code, expected: %d, found: %d" % (1, fmt))
+            raise ErrorCode(500)
+
+        old_highest = self._get_streamer_ack(device_id, origin_streamer)
+        if highest_id > old_highest:
+            self.quick_add_streamer(device_id, origin_streamer, highest_id, selector=streamer_selector)
+
+        act_first = lowest_id
+        act_last = highest_id
+        if act_last <= highest_id:
+            act_first = None
+            act_last = None
+        elif act_first <= highest_id:
+            act_first = highest_id + 1
+
+        report_record = {
+            "id": str(uuid.uuid4()),
+            "original_first_id": lowest_id,
+            "original_last_id": highest_id,
+            "actual_last_id": act_last,
+            "actual_first_id": act_first,
+            "streamer": str(gid.IOTileStreamerSlug(device_id, origin_streamer)),
+            "sent_timestamp": self._fixed_utc_timestr(),
+            "device_sent_timestamp": sent_timestamp,
+            "incremental_id": report_id,
+            "time_epsilon": 1.0,
+            "created_on": self._fixed_utc_timestr(),
+            "created_by": "quick_test_user"
+        }
+
+        self.reports[report_record['id']] = report_record
+        self.raw_report_files[report_record['id']] = indata
+
+        return {'count': (length - 24 - 20) // 16}
+
+    def _get_streamer_ack(self, device_id, index):
+        streamer = str(gid.IOTileStreamerSlug(device_id, index))
+
+        if streamer in self.streamers:
+            return self.streamers[streamer]['highest_id']
+
+        return 0
 
     def one_object(self, obj_type, request, obj_id):
         """Handle /<object>/<slug>/ GET."""
@@ -386,16 +482,26 @@ class MockIOTileCloud(object):
                 continue
 
             groups = res.groups()
-            response_headers = [(b'Content-type', b'application/json')]
 
             try:
                 data = callback(req, *groups)
                 if data is None:
                     data = {}
 
+                response_headers = [(b'Content-type', b'application/json')]
                 resp = json.dumps(data)
-
                 resp = Response(resp.encode('utf-8'), status=200, headers=response_headers)
+                return resp(environ, start_response)
+            except JSONErrorCode as err:
+                self.error_count += 1
+
+                data = err.data
+                if data is None:
+                    data = {}
+
+                resp = json.dumps(data)
+                response_headers = [(b'Content-type', b'application/json')]
+                resp = Response(resp.encode('utf-8'), status=err.status, headers=response_headers)
                 return resp(environ, start_response)
             except ErrorCode as err:
                 self.error_count += 1
@@ -406,6 +512,7 @@ class MockIOTileCloud(object):
 
         self.error_count += 1
 
+        response_headers = [(b'Content-type', b'text/plain')]
         resp = Response(b"Page not found.", status=404, headers=response_headers)
         return resp(environ, start_response)
 

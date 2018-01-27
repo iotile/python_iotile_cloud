@@ -1,3 +1,8 @@
+### v0.8.2 (2018-01-27)
+
+  * Add support for uploading reports using /streamer/report/ api, keeping
+    the raw report around along with a record of when it was uploaded.
+
 ### v0.8.1 (2018-01-26)
 
   * Fix import error that broke pytest if you did not have pytest-localserver
