@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import os.path
+from io import BytesIO
+import requests
 import pytest
 from iotile_cloud.api.connection import Api
 from iotile_cloud.api.exceptions import HttpNotFoundError
@@ -208,3 +210,45 @@ def test_quick_add_fleet(mock_cloud_private_nossl):
     # Make sure we can get all devices in a fleet
     res = api.fleet(fleet).devices.get()
     assert len(res['results']) == 3
+
+
+def test_upload_report(mock_cloud_private_nossl):
+    """Make sure we can upload data."""
+
+    domain, cloud = mock_cloud_private_nossl
+    api = Api(domain=domain)
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    api.login('test', 'test@arch-iot.com')
+
+    inpath = os.path.join(os.path.dirname(__file__), 'reports', 'report_100readings_10dev.bin')
+    with open(inpath, "rb") as infile:
+        data = infile.read()
+
+    timestamp = '{}'.format(cloud._fixed_utc_timestr())
+    payload = {'file': BytesIO(data)}
+
+    resource = api.streamer.report
+
+    headers = {}
+    authorization_str = '{0} {1}'.format(api.token_type, api.token)
+    headers['Authorization'] = authorization_str
+
+    # Make sure there are no reports
+    resp = api.streamer.report.get()
+    assert len(resp['results']) == 0
+
+    resp = requests.post(resource.url(), files=payload, headers=headers, params={'timestamp': timestamp})
+    
+    # Verify the streamer record exists
+    resp = api.streamer('t--0000-0000-0000-000a--0001').get()
+    assert resp['last_id'] == 100
+    assert resp['selector'] == 0xABCD
+
+    # Verify the report record exists and that the raw file is saved
+    resp = api.streamer.report.get()
+    assert len(resp['results']) == 1
+    rep_id = resp['results'][0]['id']
+
+    report = api.streamer.report(rep_id).get()
+    assert report['id'] == rep_id
+    assert cloud.raw_report_files[rep_id] == data
