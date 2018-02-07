@@ -76,7 +76,7 @@ class MockIOTileCloud(object):
 
         # APIs for getting raw data
         self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
-        # TODO: Figure out how to configure Mock to look at arguments so we can support '?filter='
+        # Function will get stream from '?filter='
         self._add_api(r"/api/v1/data/", self.get_stream_data)
         self._add_api(r"/api/v1/df/", self.get_stream_df)
         self._add_api(r"/api/v1/event/([0-9]+)/data/", self.get_raw_event)
@@ -366,7 +366,16 @@ class MockIOTileCloud(object):
 
         return results
 
-    def get_stream_data(self, request, stream='s--0000-0077--0000-0000-0000-00d2--5001.raw'):
+    def get_stream_data(self, request, stream=None):
+
+        if not stream:
+            # Stream can only be none if not used by /stream/<stream>/
+            # which means this is called from either /df/?filter= or /data/?filter=
+            if 'filter' in request.args:
+                filter = request.args['filter']
+                if filter.split('--')[0] == 's':
+                    stream = filter + '.raw'
+
         if stream.split('.')[0] not in self.streams:
             raise ErrorCode(404)
 
@@ -384,7 +393,7 @@ class MockIOTileCloud(object):
 
         return self._paginate(results, request, 1000)
 
-    def get_stream_df(self, request, stream='s--0000-0077--0000-0000-0000-00d2--5001.raw'):
+    def get_stream_df(self, request, stream=None):
 
         results = []
 
