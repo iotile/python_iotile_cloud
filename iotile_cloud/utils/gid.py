@@ -191,7 +191,8 @@ class IOTileVariableSlug(IOTileCloudSlug):
         :param project: IOTileCProjectSlug instance
         """
         if project:
-            assert(isinstance(project, IOTileProjectSlug))
+            if not isinstance(project, IOTileProjectSlug):
+                project = IOTileProjectSlug(project)
         if isinstance(id, int) and project != None:
             vid = int2vid(id)
             self._slug = gid_join(['v', project.formatted_id(), vid])

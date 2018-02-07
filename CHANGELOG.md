@@ -1,3 +1,8 @@
+### v0.8.3 (2018-02-06)
+
+  * Add support for `api/v1/data/?filter=` and `api/v1/df/?filter=` APIs.
+  * Build IOTileProjectSlug if needed when constructing an IOTileVariableSlug
+
 ### v0.8.2 (2018-01-27)
 
   * Add support for uploading reports using /streamer/report/ api, keeping
