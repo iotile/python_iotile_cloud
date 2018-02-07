@@ -80,6 +80,41 @@ def test_data_access(water_meter):
     api.vartype('water-meter-volume').get()
 
 
+def test_data_stream(water_meter):
+    """Make sure we can load and access data."""
+
+    domain, _cloud = water_meter
+
+    api = Api(domain=domain, verify=False)
+    api.login('test', 'test@arch-iot.com')
+
+    data = api.data.get(filter='s--0000-0077--0000-0000-0000-00d2--5001')
+
+    assert data['count'] == 9
+    first = data['results'][0]
+    assert first['project'] == 'p--0000-0077'
+    assert first['device'] == 'd--0000-0000-0000-00d2'
+    assert first['stream'] == 's--0000-0077--0000-0000-0000-00d2--5001'
+    assert first['value'] == 36339.936
+    assert first['int_value'] == 96
+
+
+def test_data_frame(water_meter):
+    """Make sure we can load and access data."""
+
+    domain, _cloud = water_meter
+
+    api = Api(domain=domain, verify=False)
+    api.login('test', 'test@arch-iot.com')
+
+    data = api.df.get(filter='s--0000-0077--0000-0000-0000-00d2--5001')
+
+    first = data[0]
+    assert first['stream_slug'] == 's--0000-0077--0000-0000-0000-00d2--5001'
+    assert first['value'] == 36339.936
+    assert first['row'] == '2017-04-12T20:06:02Z'
+
+
 def test_quick_add_functionality(mock_cloud_private_nossl):
     """Make sure quick add functions work."""
 

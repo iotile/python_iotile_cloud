@@ -76,6 +76,8 @@ class MockIOTileCloud(object):
 
         # APIs for getting raw data
         self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
+        self._add_api(r"/api/v1/data/", self.get_stream_data)
+        self._add_api(r"/api/v1/df/", self.get_stream_df)
         self._add_api(r"/api/v1/event/([0-9]+)/data/", self.get_raw_event)
 
         # APIs for querying single models
@@ -363,8 +365,8 @@ class MockIOTileCloud(object):
 
         return results
 
-    def get_stream_data(self, request, stream):
-        if stream not in self.streams:
+    def get_stream_data(self, request, stream='s--0000-0077--0000-0000-0000-00d2--5001.raw'):
+        if stream.split('.')[0] not in self.streams:
             raise ErrorCode(404)
 
         results = []
@@ -380,6 +382,21 @@ class MockIOTileCloud(object):
                 results = self._format_stream_data(self.streams[stream], csv_stream_path)
 
         return self._paginate(results, request, 1000)
+
+    def get_stream_df(self, request, stream='s--0000-0077--0000-0000-0000-00d2--5001.raw'):
+
+        results = []
+
+        data = self.get_stream_data(request, stream)
+
+        for row in data['results']:
+            results.append({
+                'row': row['timestamp'],
+                'value': row['value'],
+                'stream_slug': row['stream']
+            })
+
+        return results
 
     def _format_stream_data(self, stream, csvpath):
         results = []
