@@ -70,6 +70,10 @@ class GIDTestCase(unittest.TestCase):
     def test_variable_slug(self):
         self.assertRaises(AssertionError, IOTileVariableSlug, 5)
 
+        id = IOTileVariableSlug(5, '1234')
+        self.assertEqual(str(id), 'v--0000-1234--0005')
+        self.assertEqual(id.formatted_local_id(), '0005')
+
         id = IOTileVariableSlug(5, IOTileProjectSlug('1234'))
         self.assertEqual(str(id), 'v--0000-1234--0005')
         self.assertEqual(id.formatted_local_id(), '0005')

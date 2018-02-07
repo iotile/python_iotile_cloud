@@ -76,6 +76,7 @@ class MockIOTileCloud(object):
 
         # APIs for getting raw data
         self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
+        # TODO: Figure out how to configure Mock to look at arguments so we can support '?filter='
         self._add_api(r"/api/v1/data/", self.get_stream_data)
         self._add_api(r"/api/v1/df/", self.get_stream_df)
         self._add_api(r"/api/v1/event/([0-9]+)/data/", self.get_raw_event)

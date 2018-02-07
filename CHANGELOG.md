@@ -2,6 +2,7 @@
 
   * Add support for api/v1/data/ and api/v1/df/ APIs. Mock is currently always returning
     the same data regardless of stream slug.
+  * Build IOTileProjectSlug if needed when constructing an IOTileVariableSlug
 
 ### v0.8.2 (2018-01-27)
 
