@@ -281,8 +281,8 @@ class MockIOTileCloud(object):
             for key in payload.keys():
                 if key not in container[obj_id].keys():
                     raise ErrorCode(400)
-            for key,value in payload.iteritems():
-                container[obj_id][key] = value
+            for key in payload.keys():
+                container[obj_id][key] = payload[key]
             return container[obj_id]
         else: #Assuming method is GET instead
             return container[obj_id]
