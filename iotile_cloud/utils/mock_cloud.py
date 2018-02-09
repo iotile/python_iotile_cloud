@@ -276,7 +276,10 @@ class MockIOTileCloud(object):
             raise ErrorCode(404)
 
         if(request.method == 'PATCH'):
-            payload = json.loads(request.data)
+            payload = json.loads(request.get_data(as_text=True))
+            for key in payload.keys():
+                if key not in container[obj_id]:
+                    raise ErrorCode(400)
             for key, value in payload.items():
                 container[obj_id][key] = value
             return container[obj_id]
