@@ -263,15 +263,24 @@ class MockIOTileCloud(object):
         return 0
 
     def one_object(self, obj_type, request, obj_id):
-        """Handle /<object>/<slug>/ GET."""
+        """Handle /<object>/<slug>/ GET and PATCH."""
 
         self.verify_token(request)
-
         container = getattr(self, obj_type)
         if obj_id not in container:
             raise ErrorCode(404)
 
-        return container[obj_id]
+        
+        if(request.method == 'PATCH'):
+            payload = json.loads(request.data)
+            for key in payload.keys():
+                if key not in container[obj_id].keys():
+                    raise ErrorCode(400)
+            for key,value in payload.iteritems():
+                container[obj_id][key] = value
+            return container[obj_id]
+        else: #Assuming method is GET instead
+            pass
 
     def list_streams(self, request):
         """List and possibly filter streams."""
