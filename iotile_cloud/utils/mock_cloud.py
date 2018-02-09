@@ -93,6 +93,9 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
         self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
 
+        self._add_api(r"/api/v1/sg/([0-9\-a-z]+)/", lambda x, y: self.one_object('sg', x, y))
+        self._add_api(r"/api/v1/template/([0-9\-a-z]+)/", lambda x, y: self.one_object('template', x, y))
+
         # APIs for posting data
         self._add_api(r"/api/v1/streamer/report/", self.handle_report_api)
 
@@ -120,8 +123,10 @@ class MockIOTileCloud(object):
         self.fleets = {}
         self.fleet_members = {}
         self.streamers = {}
+        self.sgs = {}
         self.reports = {}
         self.raw_report_files = {}
+        self.templates = {}
 
         self.events = {}
 
@@ -280,7 +285,7 @@ class MockIOTileCloud(object):
                 container[obj_id][key] = value
             return container[obj_id]
         else: #Assuming method is GET instead
-            pass
+            return container[obj_id]
 
     def list_streams(self, request):
         """List and possibly filter streams."""
