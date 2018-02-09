@@ -309,3 +309,15 @@ def test_device_patch(mock_cloud_private_nossl):
     api.device('d--0000-0000-0000-000f').patch(payload)
 
     assert api.device('d--0000-0000-0000-000f').get()['sg'] == 'water-meter-v1-1-1'
+
+def test_get_sg_dt(mock_cloud_private_nossl):
+    domain, cloud = mock_cloud_private_nossl
+    api = Api(domain=domain)
+    cloud.quick_add_user('test@arch-iot.com', 'test')
+    api.login('test', 'test@arch-iot.com')
+
+    sg_slug = cloud.quick_add_sg(slug="test-sg", app_tag=1027)
+    dt_slug = cloud.quick_add_dt(slug="test-dt", os_tag=1027)
+
+    assert api.sg(sg_slug).get()['slug'] == "test-sg"
+    assert api.dt(dt_slug).get()['slug'] == "test-dt"

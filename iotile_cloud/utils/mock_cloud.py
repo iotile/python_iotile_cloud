@@ -93,8 +93,8 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
         self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
 
-        self._add_api(r"/api/v1/sg/([0-9\-a-z]+)/", lambda x, y: self.one_object('sg', x, y))
-        self._add_api(r"/api/v1/template/([0-9\-a-z]+)/", lambda x, y: self.one_object('template', x, y))
+        self._add_api(r"/api/v1/sg/([0-9\-a-z]+)/", lambda x, y: self.one_object('sgs', x, y))
+        self._add_api(r"/api/v1/dt/([0-9\-a-z]+)/", lambda x, y: self.one_object('dts', x, y))
 
         # APIs for posting data
         self._add_api(r"/api/v1/streamer/report/", self.handle_report_api)
@@ -116,6 +116,7 @@ class MockIOTileCloud(object):
         self.users = {}
         self.devices = {}
         self.datablocks = {}
+        self.dts = {}
         self.streams = {}
         self.properties = {}
         self.projects = {}
@@ -126,7 +127,6 @@ class MockIOTileCloud(object):
         self.sgs = {}
         self.reports = {}
         self.raw_report_files = {}
-        self.templates = {}
 
         self.events = {}
 
@@ -281,8 +281,8 @@ class MockIOTileCloud(object):
             for key in payload.keys():
                 if key not in container[obj_id].keys():
                     raise ErrorCode(400)
-            for key in payload.keys():
-                container[obj_id][key] = payload[key]
+            for key, values in payload.items():
+                container[obj_id][key] = values
             return container[obj_id]
         else: #Assuming method is GET instead
             return container[obj_id]
@@ -644,6 +644,22 @@ class MockIOTileCloud(object):
 
         self.projects[proj_id] = proj_data
         return proj_id, slug
+    
+    def quick_add_sg(self, slug="water-meter-v1-1-0", app_tag=1027):
+        sg = {
+            "slug": slug,
+            "app_tag": app_tag
+        }
+        self.sgs[slug] = sg
+        return slug
+
+    def quick_add_dt(self, slug="internaltestingtemplate-v0-1-0", os_tag=0):
+        dt = {
+            "slug": slug,
+            "os_tag": os_tag
+        }
+        self.dts[slug] = dt
+        return slug
 
     def quick_add_org(self, name, slug=None):
         """Quickly add a new org.
