@@ -1,3 +1,7 @@
+### 0.8.4
+
+  * Add support for PATCH in API
+
 ### v0.8.3 (2018-02-06)
 
   * Add support for `api/v1/data/?filter=` and `api/v1/df/?filter=` APIs.

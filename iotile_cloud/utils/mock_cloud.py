@@ -93,6 +93,9 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/org/([0-9\-a-z]+)/", lambda x, y: self.one_object('orgs', x, y))
         self._add_api(r"/api/v1/vartype/([0-9\-a-zA-Z]+)/", self.get_vartype)
 
+        self._add_api(r"/api/v1/sg/([0-9\-a-z]+)/", lambda x, y: self.one_object('sgs', x, y))
+        self._add_api(r"/api/v1/dt/([0-9\-a-z]+)/", lambda x, y: self.one_object('dts', x, y))
+
         # APIs for posting data
         self._add_api(r"/api/v1/streamer/report/", self.handle_report_api)
 
@@ -113,6 +116,7 @@ class MockIOTileCloud(object):
         self.users = {}
         self.devices = {}
         self.datablocks = {}
+        self.dts = {}
         self.streams = {}
         self.properties = {}
         self.projects = {}
@@ -120,6 +124,7 @@ class MockIOTileCloud(object):
         self.fleets = {}
         self.fleet_members = {}
         self.streamers = {}
+        self.sgs = {}
         self.reports = {}
         self.raw_report_files = {}
 
@@ -263,15 +268,23 @@ class MockIOTileCloud(object):
         return 0
 
     def one_object(self, obj_type, request, obj_id):
-        """Handle /<object>/<slug>/ GET."""
+        """Handle /<object>/<slug>/ GET and PATCH."""
 
         self.verify_token(request)
-
         container = getattr(self, obj_type)
         if obj_id not in container:
             raise ErrorCode(404)
 
-        return container[obj_id]
+        if(request.method == 'PATCH'):
+            payload = json.loads(request.get_data(as_text=True))
+            for key in payload.keys():
+                if key not in container[obj_id]:
+                    raise ErrorCode(400)
+            for key, value in payload.items():
+                container[obj_id][key] = value
+            return container[obj_id]
+        else: #Assuming method is GET instead
+            return container[obj_id]
 
     def list_streams(self, request):
         """List and possibly filter streams."""
@@ -630,6 +643,22 @@ class MockIOTileCloud(object):
 
         self.projects[proj_id] = proj_data
         return proj_id, slug
+    
+    def quick_add_sg(self, slug="water-meter-v1-1-0", app_tag=1027):
+        sg = {
+            "slug": slug,
+            "app_tag": app_tag
+        }
+        self.sgs[slug] = sg
+        return slug
+
+    def quick_add_dt(self, slug="internaltestingtemplate-v0-1-0", os_tag=0):
+        dt = {
+            "slug": slug,
+            "os_tag": os_tag
+        }
+        self.dts[slug] = dt
+        return slug
 
     def quick_add_org(self, name, slug=None):
         """Quickly add a new org.
