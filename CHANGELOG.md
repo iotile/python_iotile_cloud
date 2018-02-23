@@ -1,4 +1,8 @@
-### 0.8.4
+### v0.8.5 (2018-02-23)
+
+  * Fix get stream acknowledgment to get the right dictionary field (Issue #28)
+  
+### v0.8.4
 
   * Add support for PATCH in API
 
