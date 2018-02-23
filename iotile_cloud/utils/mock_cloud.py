@@ -206,26 +206,56 @@ class MockIOTileCloud(object):
             raise JSONErrorCode({'error': 'missing timestamp argument'}, 400)
 
         infile = request.files['file']
+        self.logger.info("Received uploaded report, filename: %s", infile.filename)
+
         indata = infile.read()
 
-        if len(indata) < (20 + 16):
-            print("Invalid input data length, too short, length=%d" % len(indata))
-            raise ErrorCode({'error': 'invalid file length'}, 400)
+        # Quick code to support both message pack reports and SignedListReport without depending on ReportParser
+        if infile.filename.endswith(".mp"):
+            try:
+                import msgpack
+            except ImportError:
+                self.logger.error("python-msgpack not installed, cannot parse message pack report")
+                return {'count': 0}
 
-        inheader = indata[:20]
-        infooter = indata[-24:]
+            report = msgpack.unpackb(indata)
 
-        lowest_id, highest_id = struct.unpack_from("<LL", infooter)
-        fmt, len_low, len_high, device_id, report_id, sent_timestamp, _signature_flags, origin_streamer, streamer_selector = struct.unpack("<BBHLLLBBH", inheader)
+            fmt = report.get('format')
 
-        length = (len_high << 8) | len_low
-        if length != len(indata):
-            print("Invalid input data length, did not match, expected: %d, found: %d" % (length, len(indata)))
-            raise ErrorCode(500)
+            lowest_id = report.get('lowest_id', 0)
+            highest_id = report.get('highest_id', 0)
+            device_id = report.get('device', 0)
+            origin_streamer = report.get('streamer_index')
+            streamer_selector = report.get('streamer_selector')
+            sent_timestamp = report.get('device_sent_timestamp')
+            report_id = report.get('incremental_id')
+            count = len(report.get('data', []))
 
-        if fmt != 1:
-            print("Invalid report format code, expected: %d, found: %d" % (1, fmt))
-            raise ErrorCode(500)
+            if fmt != 'v100':
+                self.logger.error("Invalid format given in message packed report: %s", fmt)
+                raise ErrorCode(400)
+        else:
+            if len(indata) < (20 + 16):
+                print("Invalid input data length, too short, length=%d" % len(indata))
+                raise ErrorCode({'error': 'invalid file length'}, 400)
+
+            inheader = indata[:20]
+            infooter = indata[-24:]
+
+            lowest_id, highest_id = struct.unpack_from("<LL", infooter)
+            fmt, len_low, len_high, device_id, report_id, sent_timestamp, _signature_flags, origin_streamer, streamer_selector = struct.unpack("<BBHLLLBBH", inheader)
+
+            length = (len_high << 8) | len_low
+            if length != len(indata):
+                print("Invalid input data length, did not match, expected: %d, found: %d" % (length, len(indata)))
+                raise ErrorCode(500)
+
+            if fmt != 1:
+                print("Invalid report format code, expected: %d, found: %d" % (1, fmt))
+                raise ErrorCode(500)
+
+            count = (length - 24 - 20) // 16
+
 
         old_highest = self._get_streamer_ack(device_id, origin_streamer)
         if highest_id > old_highest:
@@ -237,7 +267,7 @@ class MockIOTileCloud(object):
             act_first = None
             act_last = None
         elif act_first <= highest_id:
-            act_first = highest_id + 1
+            act_first = highest_id + 1            
 
         report_record = {
             "id": str(uuid.uuid4()),
@@ -257,7 +287,7 @@ class MockIOTileCloud(object):
         self.reports[report_record['id']] = report_record
         self.raw_report_files[report_record['id']] = indata
 
-        return {'count': (length - 24 - 20) // 16}
+        return {'count': count}
 
     def _get_streamer_ack(self, device_id, index):
         streamer = str(gid.IOTileStreamerSlug(device_id, index))
