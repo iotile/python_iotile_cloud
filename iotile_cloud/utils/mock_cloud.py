@@ -263,7 +263,7 @@ class MockIOTileCloud(object):
         streamer = str(gid.IOTileStreamerSlug(device_id, index))
 
         if streamer in self.streamers:
-            return self.streamers[streamer]['highest_id']
+            return self.streamers[streamer]['last_id']
 
         return 0
 
@@ -799,6 +799,9 @@ class MockIOTileCloud(object):
             selector (int): Optional selector criteria used by this streamer.  If this
                 is specified it is used as is.  If not, the default selector for each
                 index is used.
+
+        Returns:
+            str: The slug of the streamer that was just created
         """
 
         default_selectors = {
@@ -831,6 +834,8 @@ class MockIOTileCloud(object):
         }
 
         self.streamers[streamer_slug] = streamer_data
+
+        return streamer_slug
 
     def quick_add_fleet(self, devices, is_network=False, fleet_slug=None, org_slug=None):
         """Quickly add a fleet.

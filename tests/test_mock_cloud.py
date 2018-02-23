@@ -138,6 +138,12 @@ def test_quick_add_functionality(mock_cloud_private_nossl):
     org_data = api.org(proj_data['org']).get()
     assert org_data['slug'] == "quick-test-org"
 
+    # Make sure quick add streamer works (Issue 28)
+    slug = cloud.quick_add_streamer(1, 0, 10)
+    resp = api.streamer(slug).get()
+    print(resp)
+    assert resp['last_id'] == 10
+
 
 def test_quick_add_device(mock_cloud_private_nossl):
     """Make sure quick_add_device works."""
