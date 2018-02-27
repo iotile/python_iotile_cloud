@@ -134,6 +134,20 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(resp['id'], 1)
 
     @requests_mock.Mocker()
+    def test_post_with_extra_args(self, m):
+        payload = {
+            "foo": ["a", "b", "c"]
+        }
+        result = {
+            "id": 1
+        }
+        m.post('http://iotile.test/api/v1/test/', text=json.dumps(result))
+
+        api = Api(domain='http://iotile.test')
+        resp = api.test.post(payload, foo='bar')
+        self.assertEqual(resp['id'], 1)
+
+    @requests_mock.Mocker()
     def test_patch(self, m):
         payload = {
             "foo": ["a", "b", "c"]

@@ -1,7 +1,11 @@
+### v0.8.6 (2018-02-27)
+
+  * Allow params to be passed to POST, PATCH, PUT and DELETE
+  
 ### v0.8.5 (2018-02-23)
 
   * Fix get stream acknowledgment to get the right dictionary field (Issue #28)
-  
+
 ### v0.8.4
 
   * Add support for PATCH in API
