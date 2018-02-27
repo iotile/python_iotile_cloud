@@ -163,7 +163,9 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.post(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+            resp = requests.post(
+                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
+            )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -176,7 +178,9 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.patch(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+            resp = requests.patch(
+                self.url(), data=payload, headers=self._get_header(),params=kwargs,  verify=self._store['verify']
+            )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -189,7 +193,9 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.put(self.url(), data=payload, headers=self._get_header(), verify=self._store['verify'])
+            resp = requests.put(
+                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
+            )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -197,7 +203,9 @@ class RestResource(object):
 
     def delete(self, **kwargs):
         try:
-            resp = requests.delete(self.url(), headers=self._get_header(), verify=self._store['verify'])
+            resp = requests.delete(
+                self.url(), headers=self._get_header(), params=kwargs, verify=self._store['verify']
+            )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
