@@ -40,8 +40,15 @@ class GIDTestCase(unittest.TestCase):
 
         id = IOTileDeviceSlug('0005')
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
-
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0005')
+
+        id = IOTileDeviceSlug('d--1234-0000-0000-0001')
+        self.assertEqual(str(id), 'd--0000-0000-0000-0001')
+        self.assertEqual(id.get_id(), 1)
+
+        id = IOTileDeviceSlug('1234-0000-0000-0001')
+        self.assertEqual(str(id), 'd--0000-0000-0000-0001')
+        self.assertEqual(id.get_id(), 1)
 
     def test_block_slug(self):
         id = IOTileBlockSlug(5)

@@ -82,9 +82,19 @@ class IOTileDeviceSlug(IOTileCloudSlug):
             return
 
         if isinstance(id, int):
-            did = int2did(id)    
+            did = int2did(id)
         else:
-            did = id
+            assert isinstance(id, str)
+            parts = gid_split(id)
+            if len(parts) == 1:
+                did = parts[0]
+            else:
+                did = gid_join(parts[1:])
+
+            # Convert to int and back to get rid of anything above 48 bits
+            id = gid2int(did)
+            did = int2did(id)
+
         self.set_from_single_id_slug('d', 4, did)
 
 

@@ -1,7 +1,11 @@
+### v0.8.7 (2018-03-02)
+
+  * Ensure IOTileDeviceSlug only considers 48 bits when converting formatted ids
+  
 ### v0.8.6 (2018-02-27)
 
   * Allow params to be passed to POST, PATCH, PUT and DELETE
-  
+
 ### v0.8.5 (2018-02-23)
 
   * Fix get stream acknowledgment to get the right dictionary field (Issue #28)
