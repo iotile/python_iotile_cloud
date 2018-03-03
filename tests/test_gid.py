@@ -217,12 +217,11 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileFleetSlug(1)
         assert str(id) == 'g--0000-0000-0001'
 
-        id = IOTileDeviceSlug('g--1234')
-        self.assertEqual(str(id), 'f--0000-0000-1234')
+        id = IOTileFleetSlug('g--1234')
+        self.assertEqual(str(id), 'g--0000-0000-1234')
 
-        id = IOTileDeviceSlug('0005')
+        id = IOTileFleetSlug('0005')
         self.assertEqual(str(id), 'g--0000-0000-0005')
-
 
         self.assertEqual(id.formatted_id(), '0000-0000-0005')
 

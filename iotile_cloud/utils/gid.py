@@ -138,6 +138,9 @@ class IOTileFleetSlug(IOTileCloudSlug):
                 raise ValueError('IOTileFleetSlug: UUID should be greater than zero and less than 16^12')
             fid = int2fid(id)
         else:
+            if not isinstance(id, str):
+                raise ValueError('IOTileFleetSlug: must be an int or str')
+            parts = gid_split(id)
             if len(parts) == 1:
                 fid = parts[0]
             else:
