@@ -1,3 +1,7 @@
+### v0.8.8 (2018-03-02)
+
+  * Better testing of IOTileCloudSlug corner cases
+
 ### v0.8.7 (2018-03-02)
 
   * Ensure IOTileDeviceSlug only considers 48 bits when converting formatted ids
