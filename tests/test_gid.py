@@ -227,8 +227,6 @@ class GIDTestCase(unittest.TestCase):
 
         self.assertRaises(ValueError, IOTileFleetSlug, 'string')
         self.assertRaises(ValueError, IOTileFleetSlug, 'x--0000-0000-0001')
-        self.assertRaises(ValueError, IOTileFleetSlug, '0000-0000-0000')
         self.assertRaises(ValueError, IOTileFleetSlug, -5)
-        self.assertRaises(ValueError, IOTileFleetSlug, 0)
         self.assertRaises(ValueError, IOTileFleetSlug, pow(16,12))
 

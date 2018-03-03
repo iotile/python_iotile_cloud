@@ -134,7 +134,7 @@ class IOTileFleetSlug(IOTileCloudSlug):
 
     def __init__(self, id):
         if isinstance(id, int):
-            if id <= 0 or id >= pow(16, 12):
+            if id < 0 or id >= pow(16, 12):
                 raise ValueError('IOTileFleetSlug: UUID should be greater than zero and less than 16^12')
             fid = int2fid(id)
         else:
@@ -150,7 +150,7 @@ class IOTileFleetSlug(IOTileCloudSlug):
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(fid)
-            if id <= 0 or id >= pow(16, 12):
+            if id < 0 or id >= pow(16, 12):
                 raise ValueError('IOTileFleetSlug: UUID should be greater than zero and less than 16^8')
             fid = int2fid(id)
 
