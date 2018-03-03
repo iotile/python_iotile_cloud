@@ -10,6 +10,10 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileProjectSlug(5)
         self.assertEqual(str(id), 'p--0000-0005')
 
+        # We allow projects to be zero as we use that to represent no project
+        id = IOTileProjectSlug(0)
+        self.assertEqual(str(id), 'p--0000-0000')
+
         id = IOTileProjectSlug('p--0000-1234')
         self.assertEqual(str(id), 'p--0000-1234')
 
@@ -20,6 +24,13 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(id), 'p--0000-0005')
 
         self.assertEqual(id.formatted_id(), '0000-0005')
+
+        self.assertRaises(ValueError, IOTileProjectSlug, 'string')
+        self.assertRaises(ValueError, IOTileProjectSlug, 'x--0000-0001')
+        self.assertRaises(ValueError, IOTileProjectSlug, 'p--1234-0000-0000-0001') # > 16bts
+        self.assertRaises(ValueError, IOTileProjectSlug, -5)
+        self.assertRaises(ValueError, IOTileProjectSlug, pow(16,8))
+
 
     def test_device_slug(self):
         id = IOTileDeviceSlug(5)
@@ -42,19 +53,13 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0005')
 
-        id = IOTileDeviceSlug('d--1234-0000-0000-0001')
-        self.assertEqual(str(id), 'd--0000-0000-0000-0001')
-        self.assertEqual(id.get_id(), 1)
-
-        id = IOTileDeviceSlug('1234-0000-0000-0001')
-        self.assertEqual(str(id), 'd--0000-0000-0000-0001')
-        self.assertEqual(id.get_id(), 1)
-
         self.assertRaises(ValueError, IOTileDeviceSlug, 'string')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'x--0000-0000-0000-0001')
         self.assertRaises(ValueError, IOTileDeviceSlug, '0000-0000-0000-0000')
+        self.assertRaises(ValueError, IOTileDeviceSlug, 'd--1234-0000-0000-0001') # > 48bts
         self.assertRaises(ValueError, IOTileDeviceSlug, -5)
         self.assertRaises(ValueError, IOTileDeviceSlug, 0)
+        self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,12))
 
     def test_block_slug(self):
         id = IOTileBlockSlug(5)
@@ -85,6 +90,7 @@ class GIDTestCase(unittest.TestCase):
         self.assertRaises(ValueError, IOTileBlockSlug, '0000-0000-0000-0000')
         self.assertRaises(ValueError, IOTileBlockSlug, -5)
         self.assertRaises(ValueError, IOTileBlockSlug, 0)
+        self.assertRaises(ValueError, IOTileBlockSlug, pow(16,16))
 
     def test_variable_slug(self):
         self.assertRaises(ValueError, IOTileVariableSlug, 'foo')
@@ -107,8 +113,11 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileVariableSlug('v--0000-1234--0005')
         self.assertEqual(str(id), 'v--0000-1234--0005')
 
+        self.assertRaises(ValueError, IOTileVariableSlug, 'string')
+        self.assertRaises(ValueError, IOTileVariableSlug, 'v--0123')
         self.assertRaises(ValueError, IOTileVariableSlug, -5)
         self.assertRaises(ValueError, IOTileVariableSlug, 0)
+        self.assertRaises(ValueError, IOTileVariableSlug, pow(16,4))
 
     def test_stream_slug(self):
         self.assertRaises(ValueError, IOTileStreamSlug, 5)
