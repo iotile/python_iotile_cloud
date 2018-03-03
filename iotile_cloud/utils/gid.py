@@ -76,11 +76,24 @@ class IOTileProjectSlug(IOTileCloudSlug):
 
     def __init__(self, id):
         if isinstance(id, int):
-            if id < 0:
-                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero')
+            if id < 0 or id >= pow(16, 8):
+                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero and less than 16^8')
             pid = int2pid(id)
         else:
-            pid = id
+            parts = gid_split(id)
+            if len(parts) == 1:
+                pid = parts[0]
+            else:
+                if parts[0] != 'p':
+                    raise ValueError('IOTileProjectSlug: must start with a "p"')
+                pid = gid_join(parts[1:])
+
+            # Convert to int and back to get rid of anything above 48 bits
+            id = gid2int(pid)
+            if id <= 0 or id >= pow(16, 8):
+                raise ValueError('IOTileProjectSlug: UUID should be greater than zero and less than 16^8')
+            pid = int2did(id)
+
         self.set_from_single_id_slug('p', 2, pid)
 
 
@@ -93,8 +106,8 @@ class IOTileDeviceSlug(IOTileCloudSlug):
             return
 
         if isinstance(id, int):
-            if id <= 0:
-                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero')
+            if id <= 0 or id >= pow(16, 12):
+                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
             did = int2did(id)
         else:
             if not isinstance(id, str):
@@ -109,8 +122,8 @@ class IOTileDeviceSlug(IOTileCloudSlug):
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(did)
-            if id <= 0:
-                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero')
+            if id <= 0 or id >= pow(16, 12):
+                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
             did = int2did(id)
 
         self.set_from_single_id_slug('d', 4, did)
@@ -133,15 +146,15 @@ class IOTileBlockSlug(IOTileCloudSlug):
 
     def __init__(self, id, block=0):
         if isinstance(id, int):
-            if id <= 0:
-                raise ValueError('IOTileBlockSlug: UUID should be greater than zero')
+            if id <= 0 or id >= pow(16, 16):
+                raise ValueError('IOTileBlockSlug: UUID should be greater than zero and less than 16^16')
             did = int2did(id)
         else:
             parts = gid_split(id)
             if(len(parts) == 1):
                 # gid2int will raise exception if not a proper HEX string
                 id = gid2int(parts[0])
-                if id <= 0:
+                if id <= 0 or id >= pow(16, 16):
                     raise ValueError('IOTileBlockSlug: UUID should be greater than zero')
                 parts = ['d',] + parts
             if parts[0] not in ['d', 'b']:
@@ -234,7 +247,7 @@ class IOTileVariableSlug(IOTileCloudSlug):
                 project = IOTileProjectSlug(project)
 
         if isinstance(id, int):
-            if id <= 0:
+            if id <= 0 or id >= pow(16, 4):
                 raise ValueError('IOTileVariableSlug: UUID should be greater than zero')
             vid = int2vid(id)
             self._slug = gid_join(['v', project.formatted_id(), vid])

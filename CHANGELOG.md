@@ -1,3 +1,7 @@
+### v0.8.9 (2018-03-02)
+
+  * Explicitly check for upper limits for the different IOTileCloudSlug IDs
+
 ### v0.8.8 (2018-03-02)
 
   * Better testing of IOTileCloudSlug corner cases
