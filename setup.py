@@ -18,6 +18,7 @@ setup(name='iotile_cloud',
         'pytest11': ['mock_cloud = iotile_cloud.utils.mock_cloud']
     },
     install_requires=[
+        'future',
         'requests',
         'python-dateutil'
     ],
