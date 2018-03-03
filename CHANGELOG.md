@@ -1,3 +1,8 @@
+### v0.8.8 (2018-03-02)
+
+  * Better testing of IOTileCloudSlug corner cases
+  * Add `future` package to make utils.gid python2 friendly
+
 ### v0.8.7 (2018-03-02)
 
   * Ensure IOTileDeviceSlug only considers 48 bits when converting formatted ids

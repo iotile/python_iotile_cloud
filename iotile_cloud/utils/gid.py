@@ -1,3 +1,4 @@
+from builtins import int
 
 int16gid = lambda n: '-'.join(['{:04x}'.format(n >> (i << 4) & 0xFFFF) for i in range(0, 1)[::-1]])
 int32gid = lambda n: '-'.join(['{:04x}'.format(n >> (i << 4) & 0xFFFF) for i in range(0, 2)[::-1]])
@@ -33,7 +34,11 @@ def fix_gid(gid, num_terms):
 def gid2int(gid):
     elements = gid.split('-')
     hex_value = ''.join(elements)
-    return int(hex_value, 16)
+    try:
+        id = int(hex_value, 16)
+    except Exception:
+        raise ValueError('Expected HEX number. Got {}'.format(hex_value))
+    return id
 
 
 class IOTileCloudSlug(object):
@@ -47,8 +52,10 @@ class IOTileCloudSlug(object):
         return gid_join(parts[1:])
 
     def set_from_single_id_slug(self, type, terms, id):
-        assert(type in ['p', 'd', 'b', 'g'])
-        assert (isinstance(id, str))
+        if type not in ['p', 'd', 'b', 'g']:
+            raise ValueError('Slugs must start with p/d/b/g')
+        if not isinstance(id, str):
+            raise ValueError('Slug must be a string')
         parts = gid_split(id)
         if parts[0] in ['p', 'd', 'b', 'g']:
             id = parts[1]
@@ -57,8 +64,10 @@ class IOTileCloudSlug(object):
 
     def get_id(self):
         parts = gid_split(self._slug)
-        assert(len(parts) == 2)
-        assert(parts[0] in ['p', 'd', 'g'])
+        if len(parts) != 2:
+            raise ValueError('Cannot call get_id() for IDs with more than one term')
+        if parts[0] not in ['p', 'd', 'g']:
+            raise ValueError('Only Devices/DataBlocks/Fleets have single IDs')
         return gid2int(parts[1])
 
 
@@ -67,6 +76,8 @@ class IOTileProjectSlug(IOTileCloudSlug):
 
     def __init__(self, id):
         if isinstance(id, int):
+            if id < 0:
+                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero')
             pid = int2pid(id)
         else:
             pid = id
@@ -82,17 +93,24 @@ class IOTileDeviceSlug(IOTileCloudSlug):
             return
 
         if isinstance(id, int):
+            if id <= 0:
+                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero')
             did = int2did(id)
         else:
-            assert isinstance(id, str)
+            if not isinstance(id, str):
+                raise ValueError('IOTileDeviceSlug: must be an int or str')
             parts = gid_split(id)
             if len(parts) == 1:
                 did = parts[0]
             else:
+                if parts[0] != 'd':
+                    raise ValueError('IOTileDeviceSlug: must start with a "d"')
                 did = gid_join(parts[1:])
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(did)
+            if id <= 0:
+                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero')
             did = int2did(id)
 
         self.set_from_single_id_slug('d', 4, did)
@@ -115,15 +133,23 @@ class IOTileBlockSlug(IOTileCloudSlug):
 
     def __init__(self, id, block=0):
         if isinstance(id, int):
+            if id <= 0:
+                raise ValueError('IOTileBlockSlug: UUID should be greater than zero')
             did = int2did(id)
         else:
             parts = gid_split(id)
             if(len(parts) == 1):
+                # gid2int will raise exception if not a proper HEX string
+                id = gid2int(parts[0])
+                if id <= 0:
+                    raise ValueError('IOTileBlockSlug: UUID should be greater than zero')
                 parts = ['d',] + parts
-            assert(parts[0] in ['d', 'b'])
+            if parts[0] not in ['d', 'b']:
+                raise ValueError('IOTileBlockSlug: Slug must start with "b" or "d"')
             id_parts = parts[1].split('-')
             if parts[0] == 'b':
-                assert(len(id_parts) == 4)
+                if len(id_parts) != 4:
+                    raise ValueError('IOTileBlockSlug: Expected format: b--xxxx-xxxx-xxxx-xxxx')
                 self._slug = id
                 self._block = id_parts[0]
                 return
@@ -131,18 +157,21 @@ class IOTileBlockSlug(IOTileCloudSlug):
                 self._block = id_parts[0]
                 did = '-'.join(id_parts[1:])
             else:
-                assert(parts[0] == 'd')
+                if parts[0] != 'd':
+                    raise ValueError('DataBlock Slug must start with "b" or "d"')
                 did = '-'.join(id_parts[0:])
         did = fix_gid(did, 3)
         if not self._block:
             self._block = int2bid(block)
         self.set_from_single_id_slug('b', 4, '-'.join([self._block, did]))
 
+
     def get_id(self):
         # DataBlocks should behave like Devices
         # get_id returns the device ID
         parts = gid_split(self._slug)
-        assert(len(parts) == 2)
+        if len(parts) != 2:
+            raise ValueError('IOTileBlockSlug: Cannot call get_id() for IDs with more than one term')
         id_parts = parts[1].split('-')
         hex_value = ''.join(id_parts[1:])
         return int(hex_value, 16)
@@ -167,7 +196,7 @@ class IOTileStreamerSlug(IOTileCloudSlug):
         elif isinstance(device, str):
             device_id = IOTileDeviceSlug(device).get_id()
         else:
-            raise ValueError("Unknown device specifier, must be string, int or IOTileDeviceSlug")
+            raise ValueError("IOTileStreamerSlug: Unknown device specifier, must be string, int or IOTileDeviceSlug")
 
         index = int(index)
 
@@ -194,26 +223,33 @@ class IOTileVariableSlug(IOTileCloudSlug):
     # Store local variable ID on top of globally unique slug
     _local = None
 
-    def __init__(self, id, project=None):
+    def __init__(self, id, project=IOTileProjectSlug(0)):
         """
 
         :param id: Variable Local Id (string or int)
-        :param project: IOTileCProjectSlug instance
+        :param project: IOTileCProjectSlug instance. Defaults to zero, which represent a wildcard
         """
         if project:
             if not isinstance(project, IOTileProjectSlug):
                 project = IOTileProjectSlug(project)
-        if isinstance(id, int) and project != None:
+
+        if isinstance(id, int):
+            if id <= 0:
+                raise ValueError('IOTileVariableSlug: UUID should be greater than zero')
             vid = int2vid(id)
             self._slug = gid_join(['v', project.formatted_id(), vid])
         else:
-            assert (isinstance(id, str))
+            if not isinstance(id, str):
+                raise ValueError("IOTileVariableSlug: ID must be int or str")
+
             parts = gid_split(id)
-            if len(parts) == 1 and project != None:
+            if len(parts) == 1:
+                # gid2int will raise exception if not a proper HEX string
+                gid2int(id)
                 self._slug = gid_join(['v', project.formatted_id(), id])
             else:
-                assert(project == None)
-                assert(len(parts) == 3)
+                if len(parts) != 3:
+                    raise ValueError("IOTileVariableSlug: Expected format: v--xxxx-xxxx--xxxx")
                 self._slug = id
         self._local = gid_split(self._slug)[2]
 
@@ -225,8 +261,10 @@ class IOTileStreamSlug(IOTileCloudSlug):
 
     def __init__(self, id=None):
         if id:
-            assert(isinstance(id, str))
-            assert(len(gid_split(id)) == 4)
+            if not isinstance(id, str):
+                raise ValueError("Variable ID must be int or str")
+            if len(gid_split(id)) != 4:
+                raise ValueError("Stream slug must have three terms: s--<prj>--<dev>--<var>")
             self._slug = id
 
     def from_parts(self, project, device, variable):
