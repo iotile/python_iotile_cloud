@@ -1,3 +1,7 @@
+### v0.8.10 (2018-03-02)
+
+  * Fix bug and missing tests in IOTileFleetSlug
+
 ### v0.8.9 (2018-03-02)
 
   * Explicitly check for upper limits for the different IOTileCloudSlug IDs

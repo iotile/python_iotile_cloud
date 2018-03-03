@@ -92,7 +92,7 @@ class IOTileProjectSlug(IOTileCloudSlug):
             id = gid2int(pid)
             if id <= 0 or id >= pow(16, 8):
                 raise ValueError('IOTileProjectSlug: UUID should be greater than zero and less than 16^8')
-            pid = int2did(id)
+            pid = int2pid(id)
 
         self.set_from_single_id_slug('p', 2, pid)
 
@@ -134,9 +134,23 @@ class IOTileFleetSlug(IOTileCloudSlug):
 
     def __init__(self, id):
         if isinstance(id, int):
+            if id <= 0 or id >= pow(16, 12):
+                raise ValueError('IOTileFleetSlug: UUID should be greater than zero and less than 16^12')
             fid = int2fid(id)
         else:
-            fid = id
+            if len(parts) == 1:
+                fid = parts[0]
+            else:
+                if parts[0] != 'g':
+                    raise ValueError('IOTileFleetSlug: must start with a "p"')
+                fid = gid_join(parts[1:])
+
+            # Convert to int and back to get rid of anything above 48 bits
+            id = gid2int(fid)
+            if id <= 0 or id >= pow(16, 12):
+                raise ValueError('IOTileFleetSlug: UUID should be greater than zero and less than 16^8')
+            fid = int2fid(id)
+
         self.set_from_single_id_slug('g', 3, fid)
 
 

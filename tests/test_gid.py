@@ -214,5 +214,22 @@ class GIDTestCase(unittest.TestCase):
     def test_fleet_gid(self):
         """Ensure that IOTileFleetSlug works."""
 
-        f_gid = IOTileFleetSlug(1)
-        assert str(f_gid) == 'g--0000-0000-0001'
+        id = IOTileFleetSlug(1)
+        assert str(id) == 'g--0000-0000-0001'
+
+        id = IOTileDeviceSlug('g--1234')
+        self.assertEqual(str(id), 'f--0000-0000-1234')
+
+        id = IOTileDeviceSlug('0005')
+        self.assertEqual(str(id), 'g--0000-0000-0005')
+
+
+        self.assertEqual(id.formatted_id(), '0000-0000-0005')
+
+        self.assertRaises(ValueError, IOTileFleetSlug, 'string')
+        self.assertRaises(ValueError, IOTileFleetSlug, 'x--0000-0000-0001')
+        self.assertRaises(ValueError, IOTileFleetSlug, '0000-0000-0000')
+        self.assertRaises(ValueError, IOTileFleetSlug, -5)
+        self.assertRaises(ValueError, IOTileFleetSlug, 0)
+        self.assertRaises(ValueError, IOTileFleetSlug, pow(16,12))
+
