@@ -50,13 +50,19 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(id), 'd--0000-0000-0000-0001')
         self.assertEqual(id.get_id(), 1)
 
+        self.assertRaises(ValueError, IOTileDeviceSlug, 'string')
+        self.assertRaises(ValueError, IOTileDeviceSlug, 'x--0000-0000-0000-0001')
+        self.assertRaises(ValueError, IOTileDeviceSlug, '0000-0000-0000-0000')
+        self.assertRaises(ValueError, IOTileDeviceSlug, -5)
+        self.assertRaises(ValueError, IOTileDeviceSlug, 0)
+
     def test_block_slug(self):
         id = IOTileBlockSlug(5)
         self.assertEqual(str(id), 'b--0000-0000-0000-0005')
         id = IOTileBlockSlug(0xa)
         self.assertEqual(str(id), 'b--0000-0000-0000-000a')
 
-        self.assertRaises(AssertionError, IOTileBlockSlug, 'b--0000-0000-1234')
+        self.assertRaises(ValueError, IOTileBlockSlug, 'b--0000-0000-1234')
 
         id = IOTileBlockSlug('b--0001-0000-0000-1234')
         self.assertEqual(str(id), 'b--0001-0000-0000-1234')
@@ -74,11 +80,21 @@ class GIDTestCase(unittest.TestCase):
 
         self.assertEqual(id.formatted_id(), '0003-0000-0000-0005')
 
+        self.assertRaises(ValueError, IOTileBlockSlug, 'string')
+        self.assertRaises(ValueError, IOTileBlockSlug, 'x--0000-0000-0000-0001')
+        self.assertRaises(ValueError, IOTileBlockSlug, '0000-0000-0000-0000')
+        self.assertRaises(ValueError, IOTileBlockSlug, -5)
+        self.assertRaises(ValueError, IOTileBlockSlug, 0)
+
     def test_variable_slug(self):
-        self.assertRaises(AssertionError, IOTileVariableSlug, 5)
+        self.assertRaises(ValueError, IOTileVariableSlug, 'foo')
 
         id = IOTileVariableSlug(5, '1234')
         self.assertEqual(str(id), 'v--0000-1234--0005')
+        self.assertEqual(id.formatted_local_id(), '0005')
+
+        id = IOTileVariableSlug(5)
+        self.assertEqual(str(id), 'v--0000-0000--0005')
         self.assertEqual(id.formatted_local_id(), '0005')
 
         id = IOTileVariableSlug(5, IOTileProjectSlug('1234'))
@@ -91,9 +107,12 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileVariableSlug('v--0000-1234--0005')
         self.assertEqual(str(id), 'v--0000-1234--0005')
 
+        self.assertRaises(ValueError, IOTileVariableSlug, -5)
+        self.assertRaises(ValueError, IOTileVariableSlug, 0)
+
     def test_stream_slug(self):
-        self.assertRaises(AssertionError, IOTileStreamSlug, 5)
-        self.assertRaises(AssertionError, IOTileStreamSlug, 's--0001')
+        self.assertRaises(ValueError, IOTileStreamSlug, 5)
+        self.assertRaises(ValueError, IOTileStreamSlug, 's--0001')
 
         id = IOTileStreamSlug('s--0000-0001--0000-0000-0000-0002--0003')
         self.assertEqual(str(id), 's--0000-0001--0000-0000-0000-0002--0003')
@@ -135,6 +154,22 @@ class GIDTestCase(unittest.TestCase):
         id.from_parts(project=7, device=1, variable=vslug)
         self.assertEqual(str(id), 's--0000-0007--0000-0000-0000-0001--5002')
 
+        id = IOTileStreamSlug()
+        id.from_parts(project=7, device=1, variable='5002')
+        self.assertEqual(str(id), 's--0000-0007--0000-0000-0000-0001--5002')
+
+        # Project is the only one that can be zero (wildcard)
+        id = IOTileStreamSlug()
+        id.from_parts(project=0, device=1, variable='5002')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
+
+        id = IOTileStreamSlug()
+        with pytest.raises(ValueError):
+            id.from_parts(project=-1, device=1, variable='5002')
+        with pytest.raises(ValueError):
+            id.from_parts(project=1, device=-1, variable='5002')
+        with pytest.raises(ValueError):
+            id.from_parts(project=1, device=1, variable=-1)
 
     def test_id_property(self):
         project = IOTileProjectSlug(5)
@@ -145,32 +180,30 @@ class GIDTestCase(unittest.TestCase):
 
         id = IOTileStreamSlug()
         id.from_parts(project=project, device=device, variable=variable)
-        self.assertRaises(AssertionError, id.get_id)
+        self.assertRaises(ValueError, id.get_id)
 
+    def test_streamer_gid(self):
+        """Ensure that IOTileStreamerSlug works."""
 
-def test_streamer_gid():
-    """Ensure that IOTileStreamerSlug works."""
+        s_gid = IOTileStreamerSlug(1, 2)
+        assert str(s_gid) == "t--0000-0000-0000-0001--0002"
+        assert s_gid.get_device() == "d--0000-0000-0000-0001"
+        assert s_gid.get_index() == "0002"
 
-    s_gid = IOTileStreamerSlug(1, 2)
-    assert str(s_gid) == "t--0000-0000-0000-0001--0002"
-    assert s_gid.get_device() == "d--0000-0000-0000-0001"
-    assert s_gid.get_index() == "0002"
+        s_gid = IOTileStreamerSlug("d--0000-0000-0000-1234", 1)
+        assert str(s_gid) == "t--0000-0000-0000-1234--0001"
 
-    s_gid = IOTileStreamerSlug("d--0000-0000-0000-1234", 1)
-    assert str(s_gid) == "t--0000-0000-0000-1234--0001"
+        with pytest.raises(ValueError):
+            IOTileStreamerSlug([], 1)
 
-    with pytest.raises(ValueError):
-        IOTileStreamerSlug([], 1)
+        d_gid = IOTileDeviceSlug(15)
+        s_gid = IOTileStreamerSlug(d_gid, 0)
+        assert str(s_gid) == "t--0000-0000-0000-000f--0000"
+        assert s_gid.get_device() == str(d_gid)
+        assert s_gid.get_index() == "0000"
 
-    d_gid = IOTileDeviceSlug(15)
-    s_gid = IOTileStreamerSlug(d_gid, 0)
-    assert str(s_gid) == "t--0000-0000-0000-000f--0000"
-    assert s_gid.get_device() == str(d_gid)
-    assert s_gid.get_index() == "0000"
+    def test_fleet_gid(self):
+        """Ensure that IOTileFleetSlug works."""
 
-
-def test_fleet_gid():
-    """Ensure that IOTileFleetSlug works."""
-
-    f_gid = IOTileFleetSlug(1)
-    assert str(f_gid) == 'g--0000-0000-0001'
+        f_gid = IOTileFleetSlug(1)
+        assert str(f_gid) == 'g--0000-0000-0001'
