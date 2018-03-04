@@ -100,13 +100,17 @@ class IOTileProjectSlug(IOTileCloudSlug):
 class IOTileDeviceSlug(IOTileCloudSlug):
     """Formatted Global Device ID: d--0000-0000-0000-0001"""
 
-    def __init__(self, id):
+    def __init__(self, id, allow_64bits=True):
+        # For backwards compatibility, allow 64 bit IDs if required
+        # Meaning that the device may in fact be a data block
+        hex_count = 16 if allow_64bits else 12
+
         if isinstance(id, IOTileDeviceSlug):
             self._slug = id._slug
             return
 
         if isinstance(id, int):
-            if id <= 0 or id >= pow(16, 12):
+            if id <= 0 or id >= pow(16, hex_count):
                 raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
             did = int2did(id)
         else:
@@ -122,9 +126,8 @@ class IOTileDeviceSlug(IOTileCloudSlug):
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(did)
-            if id <= 0 or id >= pow(16, 12):
+            if id <= 0 or id >= pow(16, hex_count):
                 raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
-            did = int2did(id)
 
         self.set_from_single_id_slug('d', 4, did)
 
@@ -301,7 +304,8 @@ class IOTileStreamSlug(IOTileCloudSlug):
         if not isinstance(project, IOTileProjectSlug):
             project = IOTileProjectSlug(project)
         if not isinstance(device, IOTileDeviceSlug):
-            device = IOTileDeviceSlug(device)
+            # Allow 64bits to handle blocks
+            device = IOTileDeviceSlug(device, allow_64bits=True)
         if not isinstance(variable, IOTileVariableSlug):
             variable = IOTileVariableSlug(variable)
         self._slug = gid_join(['s', project.formatted_id(), device.formatted_id(), variable.formatted_local_id()])
@@ -310,7 +314,7 @@ class IOTileStreamSlug(IOTileCloudSlug):
         parts = gid_split(self._slug)
         assert(len(parts) == 4)
         project = IOTileProjectSlug(parts[1])
-        device = IOTileDeviceSlug(parts[2])
+        device = IOTileDeviceSlug(parts[2], allow_64bits=True)
         variable = IOTileVariableSlug(parts[3], project)
         result = {
             'project': str(project),
