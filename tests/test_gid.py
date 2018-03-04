@@ -49,6 +49,9 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileDeviceSlug('d--1234')
         self.assertEqual(str(id), 'd--0000-0000-0000-1234')
 
+        id = IOTileDeviceSlug('d--1234-0000-0000-0001', allow_64bits=True)
+        self.assertEqual(str(id), 'd--1234-0000-0000-0001')
+
         id = IOTileDeviceSlug('0005')
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0005')
@@ -56,10 +59,11 @@ class GIDTestCase(unittest.TestCase):
         self.assertRaises(ValueError, IOTileDeviceSlug, 'string')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'x--0000-0000-0000-0001')
         self.assertRaises(ValueError, IOTileDeviceSlug, '0000-0000-0000-0000')
-        self.assertRaises(ValueError, IOTileDeviceSlug, 'd--1234-0000-0000-0001') # > 48bts
+        self.assertRaises(ValueError, IOTileDeviceSlug, 'd--1234-0000-0000-0001', False) # > 48bts
         self.assertRaises(ValueError, IOTileDeviceSlug, -5)
         self.assertRaises(ValueError, IOTileDeviceSlug, 0)
-        self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,12))
+        self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,16))
+        self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,12), False)
 
     def test_block_slug(self):
         id = IOTileBlockSlug(5)
