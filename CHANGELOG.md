@@ -1,6 +1,7 @@
 ### v0.8.12 (2018-03-07)
 
   * Fix typo in IOTileProjectSlug preventing `p--0000-0000` from been accepted as valid.
+  * Allow delete() to accept data
 
 ### v0.8.11 (2018-03-04)
 
