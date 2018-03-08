@@ -201,10 +201,15 @@ class RestResource(object):
 
         return self._process_response(resp)
 
-    def delete(self, **kwargs):
+    def delete(self, data=None, **kwargs):
+        if data:
+            payload = json.dumps(data)
+        else:
+            payload = None
+
         try:
             resp = requests.delete(
-                self.url(), headers=self._get_header(), params=kwargs, verify=self._store['verify']
+                self.url(), headers=self._get_header(), data=payload, params=kwargs, verify=self._store['verify']
             )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)

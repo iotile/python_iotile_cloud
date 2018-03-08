@@ -13,6 +13,8 @@ class GIDTestCase(unittest.TestCase):
         # We allow projects to be zero as we use that to represent no project
         id = IOTileProjectSlug(0)
         self.assertEqual(str(id), 'p--0000-0000')
+        id = IOTileProjectSlug('p--0000-0000')
+        self.assertEqual(str(id), 'p--0000-0000')
 
         id = IOTileProjectSlug('p--0000-1234')
         self.assertEqual(str(id), 'p--0000-1234')

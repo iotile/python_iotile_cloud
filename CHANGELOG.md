@@ -1,3 +1,8 @@
+### v0.8.12 (2018-03-07)
+
+  * Fix typo in IOTileProjectSlug preventing `p--0000-0000` from been accepted as valid.
+  * Allow delete() to accept data
+
 ### v0.8.11 (2018-03-04)
 
   * Change IOTileDeviceSlug back to accepting 64bits by default, but add a new allow_64bits option to be turned off

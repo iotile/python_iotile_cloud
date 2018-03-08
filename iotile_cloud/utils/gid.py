@@ -90,7 +90,7 @@ class IOTileProjectSlug(IOTileCloudSlug):
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(pid)
-            if id <= 0 or id >= pow(16, 8):
+            if id < 0 or id >= pow(16, 8):
                 raise ValueError('IOTileProjectSlug: UUID should be greater than zero and less than 16^8')
             pid = int2pid(id)
 
