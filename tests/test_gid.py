@@ -137,6 +137,18 @@ class GIDTestCase(unittest.TestCase):
         self.assertEqual(str(parts['device']), 'd--0000-0000-0000-0002')
         self.assertEqual(str(parts['variable']), 'v--0000-0001--0003')
 
+        id = IOTileStreamSlug('s--0000-0000--0000-0000-0000-0002--0003')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0002--0003')
+
+        id = IOTileStreamSlug('s----0000-0000-0000-0002--0003')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0002--0003')
+
+        parts = id.get_parts()
+        self.assertEqual(str(parts['project']), 'p--0000-0000')
+        self.assertEqual(str(parts['device']), 'd--0000-0000-0000-0002')
+        self.assertEqual(str(parts['variable']), 'v--0000-0000--0003')
+
+
     def test_stream_from_parts(self):
         project = IOTileProjectSlug(5)
         device = IOTileDeviceSlug(10)
@@ -176,6 +188,12 @@ class GIDTestCase(unittest.TestCase):
         # Project is the only one that can be zero (wildcard)
         id = IOTileStreamSlug()
         id.from_parts(project=0, device=1, variable='5002')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
+
+        id = IOTileStreamSlug()
+        id.from_parts(project='', device=1, variable='5002')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
+        id.from_parts(project=None, device=1, variable='5002')
         self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
 
         id = IOTileStreamSlug()

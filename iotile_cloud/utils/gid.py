@@ -296,12 +296,18 @@ class IOTileStreamSlug(IOTileCloudSlug):
         if id:
             if not isinstance(id, str):
                 raise ValueError("Variable ID must be int or str")
-            if len(gid_split(id)) != 4:
+            parts = gid_split(id)
+            if len(parts) != 4:
                 raise ValueError("Stream slug must have three terms: s--<prj>--<dev>--<var>")
-            self._slug = id
+            if parts[1] == '':
+                parts[1] = '0000-0000'
+            self._slug = gid_join(parts)
 
     def from_parts(self, project, device, variable):
-        if not isinstance(project, IOTileProjectSlug):
+        if project == None or project == '':
+            # It is legal to pass something like `s----1234-5001` as projects are optional
+            project = IOTileProjectSlug(0)
+        elif not isinstance(project, IOTileProjectSlug):
             project = IOTileProjectSlug(project)
         if not isinstance(device, IOTileDeviceSlug):
             # Allow 64bits to handle blocks
@@ -313,7 +319,7 @@ class IOTileStreamSlug(IOTileCloudSlug):
     def get_parts(self):
         parts = gid_split(self._slug)
         assert(len(parts) == 4)
-        project = IOTileProjectSlug(parts[1])
+        project = IOTileProjectSlug(parts[1]) if parts[1] else IOTileProjectSlug(0)
         device = IOTileDeviceSlug(parts[2], allow_64bits=True)
         variable = IOTileVariableSlug(parts[3], project)
         result = {
