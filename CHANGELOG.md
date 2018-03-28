@@ -1,3 +1,7 @@
+### v0.8.13 (2018-03-28)
+
+  * Allow IOTileStreamSlug to take a project that is None or ''
+
 ### v0.8.12 (2018-03-07)
 
   * Fix typo in IOTileProjectSlug preventing `p--0000-0000` from been accepted as valid.
