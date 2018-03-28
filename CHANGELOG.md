@@ -1,3 +1,7 @@
+### v0.9.0 (2018-XX-XX)
+
+  * Drop support for Python v3.4 and v3.5
+
 ### v0.8.13 (2018-03-28)
 
   * Allow IOTileStreamSlug to take a project that is None or ''
