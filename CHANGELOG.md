@@ -1,7 +1,7 @@
-### v0.9.0 (2018-XX-XX)
+### v0.9.0 (2018-04-10)
 
   * Drop support for Python v3.4 and v3.5
-   Update mock_cloud to properly parse integers loaded from a csv file.
+  * Update mock_cloud to properly parse integers loaded from a csv file.
 
 ### v0.8.13 (2018-03-28)
 
