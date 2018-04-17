@@ -1,3 +1,8 @@
+### v0.9.1 (2018-04-17)
+
+  * Fix /api/v1/df API to properly return csv data when requested with the
+    correct Accept header or format.
+
 ### v0.9.0 (2018-04-10)
 
   * Drop support for Python v3.4 and v3.5
