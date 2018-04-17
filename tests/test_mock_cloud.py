@@ -109,6 +109,7 @@ def test_data_frame(water_meter):
 
     data = api.df.get(filter='s--0000-0077--0000-0000-0000-00d2--5001', format='csv')
 
+    data = data.decode('utf-8')
     lines = data.split('\n')
     assert len(lines) == 12
     
