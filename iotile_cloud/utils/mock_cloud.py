@@ -447,9 +447,11 @@ class MockIOTileCloud(object):
         # If we're called through data or df api, we need to include project, stream and variable info
         # as well as other metadata
         if not stream_arg:
-            proj = 'p--' + stream[3:12]
-            dev = 'd--' + stream[14:14+19]
-            var = 'v--{}--{}'.format(stream[3:12], stream[-4:])
+            stream_slug = gid.IOTileStreamSlug(str(stream))
+            parts = stream_slug.get_parts()
+            proj = str(parts['project'])
+            dev = str(parts['device'])
+            var = str(parts['variable'])
 
             for i, line in enumerate(results):
                 line['project'] = proj
