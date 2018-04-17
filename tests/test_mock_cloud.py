@@ -90,13 +90,13 @@ def test_data_stream(water_meter):
 
     data = api.data.get(filter='s--0000-0077--0000-0000-0000-00d2--5001')
 
-    assert data['count'] == 9
+    assert data['count'] == 11
     first = data['results'][0]
     assert first['project'] == 'p--0000-0077'
     assert first['device'] == 'd--0000-0000-0000-00d2'
     assert first['stream'] == 's--0000-0077--0000-0000-0000-00d2--5001'
-    assert first['value'] == 36339.936
-    assert first['int_value'] == 96
+    assert first['value'] == 37854.1
+    assert first['int_value'] == 100
 
 
 def test_data_frame(water_meter):
@@ -107,12 +107,14 @@ def test_data_frame(water_meter):
     api = Api(domain=domain, verify=False)
     api.login('test', 'test@arch-iot.com')
 
-    data = api.df.get(filter='s--0000-0077--0000-0000-0000-00d2--5001')
+    data = api.df.get(filter='s--0000-0077--0000-0000-0000-00d2--5001', format='csv')
 
-    first = data[0]
-    assert first['stream_slug'] == 's--0000-0077--0000-0000-0000-00d2--5001'
-    assert first['value'] == 36339.936
-    assert first['row'] == '2017-04-12T20:06:02Z'
+    lines = data.split('\n')
+    assert len(lines) == 12
+    
+    data = [x.split(',') for x in lines]
+    assert data[0] == ['row','int_value','stream_slug']
+    assert data[1] == ['2017-04-11T20:37:29.608972Z', '37854.1', 's--0000-0077--0000-0000-0000-00d2--5001']
 
 
 def test_quick_add_functionality(mock_cloud_private_nossl):
