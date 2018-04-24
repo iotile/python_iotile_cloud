@@ -79,6 +79,19 @@ def test_data_access(water_meter):
 
     api.vartype('water-meter-volume').get()
 
+    extra = api.device('d--0000-0000-0000-00d2').extra.get()
+    counts = extra.get('stream_counts')
+
+    print(counts)
+    assert counts is not None
+    assert len(counts) == 3
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5001']['data_cnt'] == 11
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5001']['has_streamid'] is True
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5002']['data_cnt'] == 3
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5002']['has_streamid'] is True
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5c00']['data_cnt'] == 4
+    assert counts['s--0000-0077--0000-0000-0000-00d2--5c00']['has_streamid'] is False
+
 
 def test_data_stream(water_meter):
     """Make sure we can load and access data."""
@@ -97,6 +110,9 @@ def test_data_stream(water_meter):
     assert first['stream'] == 's--0000-0077--0000-0000-0000-00d2--5001'
     assert first['value'] == 37854.1
     assert first['int_value'] == 100
+
+    data2 = api.data.get(filter='s--0000-0077--0000-0000-0000-00d2--5c00')
+    assert data2['count'] == 4
 
 
 def test_data_frame(water_meter):

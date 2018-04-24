@@ -1,3 +1,9 @@
+### v0.9.2 (2018-04-24)
+
+  * Add support for mocking /api/v1/device/<slug>/extra/ API that will count
+    data points in streams and return their slugs even if there is no stream_id
+    object for the stream data.
+
 ### v0.9.1 (2018-04-17)
 
   * Fix /api/v1/df API to properly return csv data when requested with the
