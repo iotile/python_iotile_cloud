@@ -21,6 +21,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import re
+from future.utils import viewitems
 from collections import namedtuple
 import os.path
 import json
@@ -29,6 +30,7 @@ import csv
 import logging
 import uuid
 import struct
+import itertools
 import iotile_cloud.utils.gid as gid
 
 HAS_DEPENDENCIES = True
@@ -80,10 +82,14 @@ class MockIOTileCloud(object):
 
         # APIs for getting raw data
         self._add_api(r"/api/v1/stream/(s--[0-9\-a-f]+)/data/", self.get_stream_data)
+
         # Function will get stream from '?filter='
         self._add_api(r"/api/v1/data/", self.get_stream_data)
         self._add_api(r"/api/v1/df/", self.get_stream_df)
         self._add_api(r"/api/v1/event/([0-9]+)/data/", self.get_raw_event)
+
+        # extra APIs that return more data
+        self._add_api(r"/api/v1/device/(d--[0-9\-a-f]+)/extra/", self.device_extra)
 
         # APIs for querying single models
         self._add_api(r"/api/v1/device/(d--[0-9\-a-f]+)/", lambda x, y: self.one_object('devices', x, y))
@@ -301,6 +307,15 @@ class MockIOTileCloud(object):
 
         return 0
 
+    def device_extra(self, request, obj_id):
+        """Handle /device/<slug>/extra/ API that returns stream counts."""
+
+        included_keys = set(["id", "slug", "project", "label", "active", "created_on", "claimed_by", "claimed_on"])
+        base = {key: val for key, val in viewitems(self.one_object('devices', request, obj_id)) if key in included_keys}
+
+        base['stream_counts'] = self._raw_stream_counts(obj_id)
+        return base
+
     def one_object(self, obj_type, request, obj_id):
         """Handle /<object>/<slug>/ GET and PATCH."""
 
@@ -309,7 +324,7 @@ class MockIOTileCloud(object):
         if obj_id not in container:
             raise ErrorCode(404)
 
-        if(request.method == 'PATCH'):
+        if request.method == 'PATCH':
             payload = json.loads(request.get_data(as_text=True))
             for key in payload.keys():
                 if key not in container[obj_id]:
@@ -415,6 +430,48 @@ class MockIOTileCloud(object):
 
         return results
 
+    def _load_stream_data(self, filepath):
+        if filepath.endswith('.json'):
+            with open(filepath, "r") as infile:
+                results = json.load(infile)
+        else:
+            results = self._format_stream_data(filepath)
+
+        return results
+
+    def _raw_stream_counts(self, device_slug):
+        slug = gid.IOTileDeviceSlug(device_slug)
+        slug_name = slug.formatted_id()
+
+        if self.stream_folder is None:
+            return {}
+
+        raw_streams = {os.path.splitext(x)[0]: len(self._load_stream_data(os.path.join(self.stream_folder, x))) for x in os.listdir(self.stream_folder) if slug_name in x and (x.endswith('.json') or x.endswith('.csv'))}
+        stream_ids = {x['slug']: x for x in self.streams.values() if x['device'] == device_slug}
+
+        out_counts = {}
+
+        all_slugs = set(raw_streams)
+        all_slugs.update(stream_ids)
+
+        for slug in all_slugs:
+            has_streamid = False
+            if slug in stream_ids:
+                has_streamid = True
+
+            count = raw_streams.get(slug, 0)
+
+            # Cloud only shows streams that have data
+            if count == 0:
+                continue
+
+            out_counts[slug] = {
+                'data_cnt': count,
+                'has_streamid': has_streamid
+            }
+
+        return out_counts
+
     def get_stream_data(self, request, stream=None, paginate=True):
         stream_arg = stream
 
@@ -442,7 +499,7 @@ class MockIOTileCloud(object):
                 with open(json_stream_path, "r") as infile:
                     results = json.load(infile)
             elif os.path.isfile(csv_stream_path):
-                results = self._format_stream_data(self.streams[stream], csv_stream_path)
+                results = self._format_stream_data(csv_stream_path)
 
         # If we're called through data or df api, we need to include project, stream and variable info
         # as well as other metadata
@@ -515,7 +572,7 @@ class MockIOTileCloud(object):
         
         return EncodedResponse('text/csv', result_string)
 
-    def _format_stream_data(self, stream, csvpath):
+    def _format_stream_data(self, csvpath):
         results = []
 
         with open(csvpath, "r") as infile:
