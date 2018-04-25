@@ -21,6 +21,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import re
+from future.utils import viewitems
 from collections import namedtuple
 import os.path
 import json
@@ -309,7 +310,8 @@ class MockIOTileCloud(object):
     def device_extra(self, request, obj_id):
         """Handle /device/<slug>/extra/ API that returns stream counts."""
 
-        base = self.one_object('devices', request, obj_id).copy()
+        included_keys = set(["id", "slug", "project", "label", "active", "created_on", "claimed_by", "claimed_on"])
+        base = {key: val for key, val in viewitems(self.one_object('devices', request, obj_id)) if key in included_keys}
 
         base['stream_counts'] = self._raw_stream_counts(obj_id)
         return base
