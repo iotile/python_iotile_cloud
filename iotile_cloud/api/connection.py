@@ -222,25 +222,32 @@ class RestResource(object):
         else:
             return False
 
-    def upload_file(self, filename, mode='rb', **kwargs):
-        try:
-            payload = {
-                'file': open(filename, mode)
+    def upload_file(self, filename, data=None, mode='rb', **kwargs):
+        with open(filename, mode) as fp:
+            files = {
+                'file': fp
             }
-        except Exception as e:
-            raise RestBaseException(str(e))
 
-        headers = {}
-        authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
-        headers['Authorization'] = authorization_str
-        logger.debug('Uploading file to {}'.format(str(kwargs)))
+            headers = {}
+            authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
+            headers['Authorization'] = authorization_str
+            logger.debug('Uploading file to {}'.format(str(kwargs)))
 
-        try:
-            resp = requests.post(self.url(), files=payload, headers=headers, params=kwargs, verify=self._store['verify'])
-        except requests.exceptions.SSLError as err:
-            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+            try:
+                resp = requests.post(
+                    self.url(),
+                    data=data,
+                    files=files,
+                    headers=headers,
+                    params=kwargs,
+                    verify=self._store['verify']
+                )
+            except requests.exceptions.SSLError as err:
+                raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
-        return self._process_response(resp)
+            return self._process_response(resp)
+
+        raise RestBaseException('Unable to open and/or upload file')
 
     def _get_resource(self, **kwargs):
         return self.__class__(**kwargs)
