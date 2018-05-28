@@ -276,6 +276,28 @@ if ok:
     resp = c.streamer(action='report').upload_file(filename='path/to/my/file', timestamp=ts)
 ```
 
+### Uploading a Stream Event with Data
+
+Example:
+
+```
+from iotile_cloud.api.connection import Api
+
+c = Api()
+
+ok = c.login(email=args.email, password=password)
+if ok:
+
+    data = {
+       'stream': 's--0000-0001--0000-0000-0000-1111--5020',
+       'timestamp': datetime_to_str(datetime.datetime.utcnow()),
+       'encoded_extra_data': json.dumps({
+           'foo': 'bar'
+       })
+    }
+    resp = c.event.upload.upload_file(filename='path/to/my/file', data=data)
+```
+
 ### Globaly unique ID slugs
 
 To easily handle ID slugs, use the `utils.gid` package:

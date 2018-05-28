@@ -1,3 +1,8 @@
+### v0.9.3 (2018-05-27)
+
+  * Enhance upload_file to accept a data payload on top of the file for a
+    multipart file upload.
+
 ### v0.9.2 (2018-04-24)
 
   * Add support for mocking /api/v1/device/<slug>/extra/ API that will count

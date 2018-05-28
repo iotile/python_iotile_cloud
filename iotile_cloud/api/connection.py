@@ -246,7 +246,7 @@ class RestResource(object):
                 raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
             return self._process_response(resp)
-        
+
         raise RestBaseException('Unable to open and/or upload file')
 
     def _get_resource(self, **kwargs):
