@@ -228,7 +228,7 @@ class MockIOTileCloud(object):
                 self.logger.error("python-msgpack not installed, cannot parse message pack report")
                 return {'count': 0}
 
-            report = msgpack.unpackb(indata)
+            report = msgpack.unpackb(indata, raw=False)
 
             fmt = report.get('format')
 

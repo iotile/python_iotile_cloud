@@ -1,3 +1,8 @@
+### v0.9.4 (2018-06-26)
+
+  * Fix msgpack decoding on python 3.  It should pass raw=False to properly
+    decode string keys as unicode objects.
+
 ### v0.9.3 (2018-05-27)
 
   * Enhance upload_file to accept a data payload on top of the file for a
