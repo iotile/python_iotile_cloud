@@ -25,7 +25,7 @@ setup(name='iotile_cloud',
     keywords=["iotile", "arch", "iot", "automation"],
     classifiers=[
         "Programming Language :: Python",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules"
