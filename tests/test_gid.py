@@ -62,10 +62,12 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileDeviceSlug('0000')
         self.assertEqual(str(id), 'd--0000-0000-0000-0000')
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0000')
+        id = IOTileDeviceSlug('0000-0000-0000')
+        self.assertEqual(str(id), 'd--0000-0000-0000-0000')
+        self.assertEqual(id.formatted_id(), '0000-0000-0000-0000')
 
         self.assertRaises(ValueError, IOTileDeviceSlug, 'string')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'x--0000-0000-0000-0001')
-        self.assertRaises(ValueError, IOTileDeviceSlug, '0000-0000-0000-0000')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'd--1234-0000-0000-0001', False) # > 48bts
         self.assertRaises(ValueError, IOTileDeviceSlug, -5)
         self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,16))
