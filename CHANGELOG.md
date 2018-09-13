@@ -1,3 +1,7 @@
+### v0.9.5 (2018-09-13)
+
+  * Support for Virtual Streams where Device is 0 (or None)
+
 ### v0.9.4 (2018-06-26)
 
   * Fix msgpack decoding on python 3.  It should pass raw=False to properly

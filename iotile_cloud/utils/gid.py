@@ -126,8 +126,8 @@ class IOTileDeviceSlug(IOTileCloudSlug):
 
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(did)
-            if id <= 0 or id >= pow(16, hex_count):
-                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
+            if id < 0 or id >= pow(16, hex_count):
+                raise ValueError('IOTileDeviceSlug: UUID should be greater or equal than zero and less than 16^12')
 
         self.set_from_single_id_slug('d', 4, did)
 
