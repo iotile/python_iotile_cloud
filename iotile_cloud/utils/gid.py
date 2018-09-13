@@ -311,7 +311,7 @@ class IOTileStreamSlug(IOTileCloudSlug):
             project = IOTileProjectSlug(project)
         if device == None or device == '':
             # It is legal to pass something like `s--0123----5001` as projects are optional
-            project = IOTileDeviceSlug(0)
+            device = IOTileDeviceSlug(0)
         elif not isinstance(device, IOTileDeviceSlug):
             # Allow 64bits to handle blocks
             device = IOTileDeviceSlug(device, allow_64bits=True)

@@ -217,6 +217,9 @@ class GIDTestCase(unittest.TestCase):
         id.from_parts(project=5, device=0, variable='5001')
         self.assertEqual(str(id), 's--0000-0005--0000-0000-0000-0000--5001')
         self.assertEqual(id.formatted_id(), '0000-0005--0000-0000-0000-0000--5001')
+        id.from_parts(project=5, device=None, variable='5001')
+        self.assertEqual(str(id), 's--0000-0005--0000-0000-0000-0000--5001')
+        self.assertEqual(id.formatted_id(), '0000-0005--0000-0000-0000-0000--5001')
 
     def test_id_property(self):
         project = IOTileProjectSlug(5)
