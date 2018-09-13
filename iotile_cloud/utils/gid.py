@@ -91,7 +91,7 @@ class IOTileProjectSlug(IOTileCloudSlug):
             # Convert to int and back to get rid of anything above 48 bits
             id = gid2int(pid)
             if id < 0 or id >= pow(16, 8):
-                raise ValueError('IOTileProjectSlug: UUID should be greater than zero and less than 16^8')
+                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero and less than 16^8')
             pid = int2pid(id)
 
         self.set_from_single_id_slug('p', 2, pid)
@@ -110,8 +110,8 @@ class IOTileDeviceSlug(IOTileCloudSlug):
             return
 
         if isinstance(id, int):
-            if id <= 0 or id >= pow(16, hex_count):
-                raise ValueError('IOTileDeviceSlug: UUID should be greater than zero and less than 16^12')
+            if id < 0 or id >= pow(16, hex_count):
+                raise ValueError('IOTileDeviceSlug: UUID should be greater or equal than zero and less than 16^12')
             did = int2did(id)
         else:
             if not isinstance(id, str):
@@ -305,11 +305,14 @@ class IOTileStreamSlug(IOTileCloudSlug):
 
     def from_parts(self, project, device, variable):
         if project == None or project == '':
-            # It is legal to pass something like `s----1234-5001` as projects are optional
+            # It is legal to pass something like `s----1234--5001` as projects are optional
             project = IOTileProjectSlug(0)
         elif not isinstance(project, IOTileProjectSlug):
             project = IOTileProjectSlug(project)
-        if not isinstance(device, IOTileDeviceSlug):
+        if device == None or device == '':
+            # It is legal to pass something like `s--0123----5001` as projects are optional
+            project = IOTileDeviceSlug(0)
+        elif not isinstance(device, IOTileDeviceSlug):
             # Allow 64bits to handle blocks
             device = IOTileDeviceSlug(device, allow_64bits=True)
         if not isinstance(variable, IOTileVariableSlug):

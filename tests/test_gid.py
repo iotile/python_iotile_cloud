@@ -35,6 +35,8 @@ class GIDTestCase(unittest.TestCase):
 
 
     def test_device_slug(self):
+        id = IOTileDeviceSlug(0)
+        self.assertEqual(str(id), 'd--0000-0000-0000-0000')
         id = IOTileDeviceSlug(5)
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
         id = IOTileDeviceSlug(0xa)
@@ -57,13 +59,15 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileDeviceSlug('0005')
         self.assertEqual(str(id), 'd--0000-0000-0000-0005')
         self.assertEqual(id.formatted_id(), '0000-0000-0000-0005')
+        id = IOTileDeviceSlug('0000')
+        self.assertEqual(str(id), 'd--0000-0000-0000-0000')
+        self.assertEqual(id.formatted_id(), '0000-0000-0000-0000')
 
         self.assertRaises(ValueError, IOTileDeviceSlug, 'string')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'x--0000-0000-0000-0001')
         self.assertRaises(ValueError, IOTileDeviceSlug, '0000-0000-0000-0000')
         self.assertRaises(ValueError, IOTileDeviceSlug, 'd--1234-0000-0000-0001', False) # > 48bts
         self.assertRaises(ValueError, IOTileDeviceSlug, -5)
-        self.assertRaises(ValueError, IOTileDeviceSlug, 0)
         self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,16))
         self.assertRaises(ValueError, IOTileDeviceSlug, pow(16,12), False)
 
@@ -189,6 +193,8 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileStreamSlug()
         id.from_parts(project=0, device=1, variable='5002')
         self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
+        id.from_parts(project=None, device=1, variable='5002')
+        self.assertEqual(str(id), 's--0000-0000--0000-0000-0000-0001--5002')
 
         id = IOTileStreamSlug()
         id.from_parts(project='', device=1, variable='5002')
@@ -203,6 +209,15 @@ class GIDTestCase(unittest.TestCase):
             id.from_parts(project=1, device=-1, variable='5002')
         with pytest.raises(ValueError):
             id.from_parts(project=1, device=1, variable=-1)
+
+        # Virtual Streams
+        id = IOTileStreamSlug()
+        id.from_parts(project=5, device=0, variable='5001')
+        self.assertEqual(str(id), 's--0000-0005--0000-0000-0000-0000--5001')
+        self.assertEqual(id.formatted_id(), '0000-0005--0000-0000-0000-0000--5001')
+        id.from_parts(project=5, device=None, variable='5001')
+        self.assertEqual(str(id), 's--0000-0005--0000-0000-0000-0000--5001')
+        self.assertEqual(id.formatted_id(), '0000-0005--0000-0000-0000-0000--5001')
 
     def test_id_property(self):
         project = IOTileProjectSlug(5)
