@@ -1,3 +1,4 @@
 pip
 twine
+twine==1.11.0
 tox==2.6.0
