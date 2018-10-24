@@ -30,7 +30,6 @@ import csv
 import logging
 import uuid
 import struct
-import itertools
 import iotile_cloud.utils.gid as gid
 
 HAS_DEPENDENCIES = True
@@ -117,6 +116,26 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/device/", self.list_devices)
         self._add_api(r"/api/v1/fleet/", self.list_fleets)
 
+        # APIs for OTA
+        # Only a subset of these are implemented currently
+        self._add_api(r"/api/v1/ota/device/(d--[0-9\-a-f]+)/", lambda x, y: self.one_object('ota_devices', x, y))
+        self._add_api(r"/api/v1/ota/script/(z--[0-9\-a-f]+)/file", lambda x, y: self.one_object('ota_scripts', x, y))
+        self._add_api(r"/api/v1/ota/script/", self.list_ota_scripts)
+
+        # OTA action post
+        self._add_api(r"/api/v1/ota/action", self.handle_ota_action)
+
+        # Generated Report APIs
+        self._add_api(r"/api/v1/report/generated/([0-9\-a-z]+)/uploadurl/", self.handle_report_generated_uploadurl)
+        self._add_api(r"/api/v1/report/generated/([0-9\-a-z]+)/uploadsuccess/",
+                      self.handle_report_generated_uploadsuccess)
+        self._add_api(r"/api/v1/report/generated/", self.handle_report_generated)
+
+    def deployment_incrementer(self):
+        """Autoincrementer for adding OTA deployment id tracking"""
+        self.deployment_count += 1
+        return self.deployment_count
+
     def reset(self):
         """Clear any stored data in in this cloud as if we created a new instance."""
 
@@ -138,6 +157,14 @@ class MockIOTileCloud(object):
         self.reports = {}
         self.raw_report_files = {}
 
+        self.generated_reports = {}
+        self.generated_reports_urls = {}
+
+        self.ota_devices = {}
+        self.deployments = {}
+        self.deployment_count = 0
+        self.ota_scripts = {}
+
         self.events = {}
 
         self.stream_folder = None
@@ -153,6 +180,7 @@ class MockIOTileCloud(object):
 
     @classmethod
     def _parse_json(cls, request, *keys):
+        """Parse a payload JSON from a POST. Optional argument for keys to handle case for specific expectations"""
         data = request.get_data()
         string_data = data.decode('utf-8')
 
@@ -190,6 +218,7 @@ class MockIOTileCloud(object):
         return vartype
 
     def get_fleet_members(self, request, slug):
+        """Get list of devices in a fleet"""
         if slug not in self.fleets:
             raise ErrorCode(404)
 
@@ -197,6 +226,112 @@ class MockIOTileCloud(object):
         results = [{'device': x[0], 'is_access_point': x[1], 'always_on': x[2]} for x in members.values()]
 
         return self._paginate(results, request, 100)
+
+    def handle_report_generated(self, request):
+        """Handle /report/generated GET and POST"""
+        if request.method == 'GET':
+            results = [x for x in self.generated_reports.values()]
+            return self._paginate(results, request, 100)
+
+        if request.method != 'POST':
+            print("Only post and get supported for this endpoint, got %s" % request.method)
+            raise ErrorCode(500)
+
+        unique_id = str(uuid.uuid4())
+
+        payload = self._parse_json(request)
+
+        if 'label' not in payload or 'org' not in payload:
+            raise JSONErrorCode({'error': 'missing label argument'}, 400)
+
+        source_org = payload['source_org'] if 'source_org' in payload else "n/a"
+
+        generated_report_record = {
+            "id": unique_id,
+            "label": payload['label'],
+            "org": payload['org'],
+            "source_org": source_org
+        }
+        self.generated_reports[unique_id] = generated_report_record
+
+        return {'id': unique_id}
+
+    def handle_report_generated_uploadurl(self, request, slug):
+        """Handle /report/generated/{slug}/uploadurl POST"""
+
+        if request.method != "POST":
+            print("Only post supported for this endpoint, got %s" % request.method)
+            raise ErrorCode(500)
+
+        if slug not in self.generated_reports:
+            print("Generated report with ID not in our records: %s" % slug)
+            raise JSONErrorCode({'error': 'invalid report UUID'}, 400)
+
+        payload = self._parse_json(request)
+
+        if 'name' not in payload:
+            raise JSONErrorCode({'error': 'missing label argument'}, 400)
+
+        if 'acl' in payload:
+            if payload['acl'] not in ("public-read", "private"):
+                raise JSONErrorCode({'error': 'invalid parameter for acl argument'}, 400)
+
+        valid_content_types = "text/plain, text/html, text/csv, image/png, image/jpeg, application/zip, application/javascript, application/json, application/octet-stream".split(", ")
+
+        if 'content_type' in payload:
+            if payload['acl'] not in valid_content_types:
+                raise JSONErrorCode({'error': 'invalid parameter for content_type argument'}, 400)
+
+        multipart_url = "unique_random_" + str(uuid.uuid4())
+
+        fields = self.generated_reports[slug]
+
+        self.generated_reports_urls[slug] = multipart_url
+
+        return {'url': multipart_url, 'fields': fields, 'uuid': slug}
+
+    def handle_report_generated_uploadsuccess(self, request, slug):
+        """Handle /report/generated/{slug}/uploadsuccess post"""
+
+        if request.method != "POST":
+            print("Only post supported for this endpoint, got %s" % request.method)
+            raise ErrorCode(500)
+
+        if slug not in self.generated_reports:
+            print("Generated report with ID not in our records: %s" % slug)
+            raise ErrorCode(404)
+
+        if slug not in self.generated_reports_urls:
+            print("Generated report with ID doesn't have upload URL generated: %s" % slug)
+            raise ErrorCode(404)
+
+        payload = self._parse_json(request)
+
+        if 'name' not in payload:
+            raise JSONErrorCode({'error': 'missing label argument'}, 400)
+
+        final_report_url = self.generated_reports_urls[slug]
+
+        return {'url': final_report_url}
+
+    def handle_ota_action(self, request):
+        """Handle /ota/action POST api"""
+
+        if request.method != "POST":
+            print("Only post supported for this endpoint, got %s" % request.method)
+            raise ErrorCode(500)
+
+        payload = self._parse_json(request)
+
+        if 'deployment' not in payload or 'device' not in payload:
+            raise JSONErrorCode({'error': 'missing label argument'}, 400)
+
+        if payload['deployment'] not in self.deployments:
+            print("Reported deployment ID that doesn't exist in deployments")
+            raise JSONErrorCode({'error': 'invalid deployment ID'}, 400)
+
+        return {'deployment': payload['deployment'],
+                'device': payload['device']}
 
     def handle_report_api(self, request):
         """Handle /streamer/report/ api."""
@@ -416,6 +551,11 @@ class MockIOTileCloud(object):
             results = [x for x in self.properties.values() if x['target'] == target_str]
 
         return self._paginate(results, request, 100)
+
+    def list_ota_scripts(self, request):
+
+        results = [x for x in self.ota_scripts.values()]
+        return  self._paginate(results, request, 100)
 
     def get_raw_event(self, request, event_id):
         if self.stream_folder is None:
@@ -1069,6 +1209,60 @@ class MockIOTileCloud(object):
         self.fleets[fleet_slug] = fleet_data
         self.fleet_members[fleet_slug] = {x[0]: x for x in device_entries}
         return fleet_slug
+
+    def quick_add_ota_device_info(self, device_slug):
+        slug_obj = gid.IOTileDeviceSlug(device_slug)
+        self.ota_devices[str(slug_obj)] = {'sg': 'water-meter-v1-1-0',
+                                           'slug': str(slug_obj),
+                                           "template": "internaltestingtemplate-v0-1-0",
+                                           'versions': [],
+                                           'deployments': []
+                                           }
+
+    def quick_add_deployment_to_fleet(self, fleet_id, deployment_id, criteria, completed=False):
+        # First : need a fleet to target
+
+        if fleet_id not in self.fleet_members:
+            raise ValueError("fleet slug does not exist")
+
+        if deployment_id in self.deployments:
+            raise ValueError("deployment ID already exists")
+        device_slugs = self.fleet_members[fleet_id]
+
+        self.deployments[deployment_id] = []
+
+        for device_slug in device_slugs:
+            deployment_data = {
+                 'attempt_successful': False,
+                 'created_on': '2018-10-16T17:04:03.062233Z',
+                 'deployment': deployment_id,
+                 'device': device_slug,
+                 'device_confirmation': False,
+                 'id': 1,  # this is auto-increment ID
+                 'last_attempt_on': None,
+                 'log': None
+            }
+            if completed:
+                completed_date = '2018-10-15'
+            else:
+                completed_date = None
+            request_data = {'completed_on': completed_date,
+                                 'fleet': fleet_id,
+                                 'id': self.deployment_incrementer(),
+                                 'org': 'arch-internal',
+                                 'released_on': '2018-10-15',
+                                 'script': 'z--0000-0002',
+                                 'selection_criteria': criteria}
+
+            self.deployments[deployment_id].append(deployment_data)
+            self.ota_scripts['z--0000-0002'] = {'name': 'foo',
+                                                'url': 'bar.com/zipzap',
+                                                'key': 'baz',
+                                                'major_version': 1,
+                                                'minor_version': 0,
+                                                'patch_version': 0
+                                                }
+            self.ota_devices[str(gid.IOTileDeviceSlug(device_slug))]['deployments'].append(request_data)
 
     def _fixed_utc_timestr(self):
         """Create an unchanging utc timestring that is timezone aware."""
