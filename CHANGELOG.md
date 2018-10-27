@@ -1,3 +1,7 @@
+### v0.9.6 (2018-10-26)
+
+  * Support for mock OTA and generated report endpoints
+
 ### v0.9.5 (2018-09-13)
 
   * Support for Virtual Streams where Device is 0 (or None)
