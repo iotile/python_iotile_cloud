@@ -1,3 +1,7 @@
+### v0.9.7 (2018-10-29)
+
+  * Sort stability for ota ID assignment
+
 ### v0.9.6 (2018-10-26)
 
   * Support for mock OTA and generated report endpoints
