@@ -16,7 +16,6 @@ Example usage can be found by looking at:
   the mock cloud with data.
 - tests/data for example mock cloud data
 """
-
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
@@ -121,8 +120,10 @@ class MockIOTileCloud(object):
         self._add_api(r"/api/v1/ota/device/(d--[0-9\-a-f]+)/", lambda x, y: self.one_object('ota_devices', x, y))
         self._add_api(r"/api/v1/ota/script/(z--[0-9\-a-f]+)/file", lambda x, y: self.one_object('ota_scripts', x, y))
         self._add_api(r"/api/v1/ota/script/", self.list_ota_scripts)
+        self._add_api(r"/api/v1/ota/request/", self.list_ota_devices)
 
-        # OTA action post
+
+        # OTA action post / get
         self._add_api(r"/api/v1/ota/action", self.handle_ota_action)
 
         # Generated Report APIs
@@ -317,6 +318,9 @@ class MockIOTileCloud(object):
     def handle_ota_action(self, request):
         """Handle /ota/action POST api"""
 
+        if request.method == "GET":
+            results = [x for x in self.deployments.values()]
+            return self._paginate(results, request, 100)
         if request.method != "POST":
             print("Only post supported for this endpoint, got %s" % request.method)
             raise ErrorCode(500)
@@ -493,6 +497,11 @@ class MockIOTileCloud(object):
         else:
             results = [x for x in self.devices.values()]
 
+        return self._paginate(results, request, 100)
+
+    def list_ota_devices(self, request):
+
+        results = [x for x in self.ota_devices.values()]
         return self._paginate(results, request, 100)
 
     def list_fleets(self, request):
@@ -1227,7 +1236,7 @@ class MockIOTileCloud(object):
 
         if deployment_id in self.deployments:
             raise ValueError("deployment ID already exists")
-        device_slugs = self.fleet_members[fleet_id]
+        device_slugs = sorted(self.fleet_members[fleet_id])
 
         self.deployments[deployment_id] = []
 
