@@ -1252,14 +1252,14 @@ class MockIOTileCloud(object):
                  'log': None
             }
             if completed:
-                completed_date = '2018-10-15'
+                completed_date = '2018-10-15T00:00:00Z'
             else:
                 completed_date = None
             request_data = {'completed_on': completed_date,
                                  'fleet': fleet_id,
                                  'id': self.deployment_incrementer(),
                                  'org': 'arch-internal',
-                                 'released_on': '2018-10-15',
+                                 'released_on': '2018-10-16T00:00:00Z',
                                  'script': 'z--0000-0002',
                                  'selection_criteria': criteria}
 
