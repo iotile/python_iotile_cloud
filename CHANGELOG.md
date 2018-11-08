@@ -1,3 +1,8 @@
+### v0.9.8 (2018-11-08)
+
+  * mock hooks updated for OTA
+
+
 ### v0.9.7 (2018-10-29)
 
   * Sort stability for ota ID assignment
