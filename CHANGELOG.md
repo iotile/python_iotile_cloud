@@ -1,7 +1,10 @@
+### v0.9.9 (2018-12-13)
+
+  * Fix login. It is now possible to log in after logout.
+
 ### v0.9.8 (2018-11-08)
 
   * mock hooks updated for OTA
-
 
 ### v0.9.7 (2018-10-29)
 
