@@ -139,9 +139,9 @@ class RestResource(object):
         return url
 
     def _get_header(self):
-        headers = DEFAULT_HEADERS
+        headers = DEFAULT_HEADERS.copy()
         if self._store['use_token']:
-            if not "token" in self._store:
+            if "token" not in self._store:
                 raise RestBaseException('No Token')
             authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
             headers['Authorization'] = authorization_str
@@ -179,7 +179,7 @@ class RestResource(object):
 
         try:
             resp = requests.patch(
-                self.url(), data=payload, headers=self._get_header(),params=kwargs,  verify=self._store['verify']
+                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
             )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
@@ -299,7 +299,7 @@ class Api(object):
 
     def logout(self):
         url = '{0}/{1}'.format(self.base_url, 'auth/logout/')
-        headers = DEFAULT_HEADERS
+        headers = DEFAULT_HEADERS.copy()
         headers['Authorization'] = '{0} {1}'.format(self.token_type, self.token)
 
         try:
@@ -317,8 +317,8 @@ class Api(object):
     def refresh_token(self):
         """
         Refresh JWT token
-        
-        :return: True if token was refreshed. False otherwise 
+
+        :return: True if token was refreshed. False otherwise
         """
         assert self.token_type == DEFAULT_TOKEN_TYPE
         url = '{0}/{1}'.format(self.base_url, 'auth/api-jwt-refresh/')
@@ -341,7 +341,6 @@ class Api(object):
         logger.error('Token refresh failed: ' + str(r.status_code) + ' ' + r.content.decode())
         self.token = None
         return False
-
 
     def __getattr__(self, item):
         """
