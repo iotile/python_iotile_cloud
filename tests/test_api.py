@@ -46,7 +46,11 @@ class ApiTestCase(unittest.TestCase):
             'jwt': 'big-token',
             'username': 'user1'
         }
-        m.post('http://iotile.test/api/v1/auth/login/', text=json.dumps(payload))
+
+        # login works only if there is no Authorization header in the request
+        def match_request_headers(request):
+            return 'Authorization' not in request.headers
+        m.post('http://iotile.test/api/v1/auth/login/', additional_matcher=match_request_headers, text=json.dumps(payload))
         m.post('http://iotile.test/api/v1/auth/logout/', status_code=204)
 
         api = Api(domain='http://iotile.test')
@@ -56,6 +60,10 @@ class ApiTestCase(unittest.TestCase):
         api.logout()
         self.assertEqual(api.username, None)
         self.assertEqual(api.token, None)
+
+        # can log in again
+        ok = api.login(email='user1@test.com', password='pass')
+        self.assertTrue(ok)
 
     @requests_mock.Mocker()
     def test_token_refresh(self, m):
@@ -211,4 +219,3 @@ class ApiTestCase(unittest.TestCase):
         api = Api(domain='http://iotile.test')
         with self.assertRaises(HttpServerError):
             api.test.post(payload)
-
