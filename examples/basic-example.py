@@ -7,6 +7,9 @@ It then uses the stream ID passed as an argument to get data for that stream
 MyScript derives from BaseMain and overwrites the after_login function
 The BaseMain will execute the following flow:
 
+        # Create an argparse class (self.parser) and add default arguments, and then:
+        self.add_extra_args()
+
         self.domain = self.get_domain()
         self.api = Api(self.domain)
         self.before_login()

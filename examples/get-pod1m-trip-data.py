@@ -12,7 +12,7 @@ The following describes the complete lifecycle of a POD-1M trip:
    to the cloud using the Companion App, at which time, all of these streams will be populated with data.
 5. The cloud is usually configured with a stream filter to send an email when the 0e01 signal is processed.
    A filter could be changed to instead call a webhook on another server.
-6. After a device reviews the trip data on the cloud, the user is able to either reset the data (delete all the stream data/events)
+6. After the cloud has processed a device's uploaded trip data, the user is able to either reset the data (delete all the stream data/events)
    or archive the trip, in which case all the data is kept but the streams are changed to the one for a Data Block which is equivalent
    to a device (but read only). All the stream APIs work on either an active trip (device) or an archived trip (Data Block).
    At this point, the device itself can be cleared and a new trip can be started.
@@ -58,10 +58,26 @@ TRIP_VARS = {
 
 class TripData(BaseMain):
     """
-    This Class derives from BaseMain and overwrites the required functions to change the arguments and do the actual work.
-    The base class will store:
-     - self.parser: The script argument parser
-     - self.api: The IOTile Cloud Connection API. After login, use to get/post/patch/put/delete on any cloud resource (i.e. Rest API)
+    TripData derives from BaseMain and overwrites the after_login function
+    The BaseMain will execute the following flow:
+
+        # Create an argparse class (self.parser) and add default arguments, and then:
+        self.add_extra_args()
+
+        self.domain = self.get_domain()
+        self.api = Api(self.domain)
+        self.before_login()
+        ok = self.login()
+        if ok:
+            self.after_login()
+            self.logout()
+            self.after_logout()
+
+    See iotile_cloud/utils/main.py for additional details.
+
+    For this script, we oinly overwrite the
+     - add_extra_args() to add the device_slug as argument
+     - after_login() to get all the data for the trip (using helper private functions)
     """
     _project = None
     _device = None
