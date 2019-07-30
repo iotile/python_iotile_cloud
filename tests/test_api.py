@@ -4,7 +4,9 @@ import mock
 import requests
 import requests_mock
 import unittest2 as unittest
+import pytest
 
+from time import sleep
 from iotile_cloud.api.connection import Api, RestResource
 from iotile_cloud.api.exceptions import HttpClientError, HttpServerError
 
@@ -25,6 +27,13 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(api.token, None)
         api.set_token('big-token')
         self.assertEqual(api.token, 'big-token')
+
+    @requests_mock.Mocker()
+    def test_timeout(self, m):
+        m.get('http://iotile.test/api/v1/timeout/', exc=requests.exceptions.ConnectTimeout )
+        api = Api(domain='http://iotile.test', timeout=0.01)
+        with self.assertRaises(requests.exceptions.ConnectTimeout):
+            api.timeout.get()
 
     @requests_mock.Mocker()
     def test_login(self, m):
