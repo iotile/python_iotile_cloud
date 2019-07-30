@@ -6,6 +6,7 @@
 *.log
 *.json
 !/tests/**/*.json
+env
 
 # Setup/Build
 build/
