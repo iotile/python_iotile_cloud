@@ -6,7 +6,6 @@ import requests_mock
 import unittest2 as unittest
 import pytest
 
-from time import sleep
 from iotile_cloud.api.connection import Api, RestResource
 from iotile_cloud.api.exceptions import HttpClientError, HttpServerError
 
