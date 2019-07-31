@@ -1,3 +1,7 @@
+### v0.9.11 (2019-07-31)
+
+  * Refactor use request sessions to handle connection retries
+
 ### v0.9.10 (2019-07-31)
 
   * Optional Api timeout parameter
