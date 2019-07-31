@@ -248,6 +248,23 @@ class RestResource(object):
         return self.__class__(**kwargs)
 
 
+class _TimeoutHTTPAdapter(requests.adapters.HTTPAdapter):
+    """Custom http adapter to allow setting timeouts on http verbs.
+
+    See https://github.com/psf/requests/issues/2011#issuecomment-64440818
+    and surrounding discussion in that thread for why this is necessary.
+
+    Short answer is that Session() objects don't support timeouts.
+    """
+    def __init__(self, timeout=None, *args, **kwargs):
+        self.timeout = timeout
+        super(_TimeoutHTTPAdapter, self).__init__(*args, **kwargs)
+
+    def send(self, *args, **kwargs):
+        kwargs['timeout'] = self.timeout
+        return super(_TimeoutHTTPAdapter, self).send(*args, **kwargs)
+
+
 class Api(object):
     token = None
     token_type = DEFAULT_TOKEN_TYPE
@@ -265,10 +282,9 @@ class Api(object):
 
         self.session = requests.Session()
         self.session.verify = verify
-        self.session.timeout = timeout
 
-        if retries is not None:
-            adapter = requests.adapters.HTTPAdapter(max_retries=retries)
+        if retries is not None or timeout is not None:
+            adapter = _TimeoutHTTPAdapter(max_retries=retries, timeout=timeout)
             self.session.mount('https://', adapter)
             self.session.mount('http://', adapter)
 
