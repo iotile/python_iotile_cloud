@@ -267,9 +267,10 @@ class Api(object):
         self.session.verify = verify
         self.session.timeout = timeout
 
-        adapter = requests.adapters.HTTPAdapter(max_retries=retries)
-        self.session.mount('https://', adapter)
-        self.session.mount('http://', adapter)
+        if retries is not None:
+            adapter = requests.adapters.HTTPAdapter(max_retries=retries)
+            self.session.mount('https://', adapter)
+            self.session.mount('http://', adapter)
 
     def set_token(self, token, token_type=None):
         self.token = token
