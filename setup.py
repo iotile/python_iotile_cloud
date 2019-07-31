@@ -19,7 +19,7 @@ setup(name='iotile_cloud',
     },
     install_requires=[
         'future',
-        'requests',
+        'requests>=2.21.0',
         'python-dateutil'
     ],
     keywords=["iotile", "arch", "iot", "automation"],
