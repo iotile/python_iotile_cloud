@@ -1,3 +1,7 @@
+### v0.9.10 (2019-07-31)
+
+  * Optional Api timeout parameter
+
 ### v0.9.9 (2018-12-13)
 
   * Fix login. It is now possible to log in after logout.
