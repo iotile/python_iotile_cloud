@@ -1,7 +1,15 @@
-### v0.9.10 (2019-11-01)
+### v0.9.12 (2019-11-01)
 
 * Add an upload_fp on top of existing upload_file.
     Change upload_file to reuse upload_fp
+
+### v0.9.11 (2019-07-31)
+
+* Refactor use request sessions to handle connection retries
+
+### v0.9.10 (2019-07-31)
+
+* Optional Api timeout parameter
 
 ### v0.9.9 (2018-12-13)
 

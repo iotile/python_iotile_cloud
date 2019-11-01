@@ -36,10 +36,13 @@ class RestResource(object):
 
     def __init__(self, *args, **kwargs):
         self._store = kwargs
+        self._session = kwargs.get('session')
+
+        if self._session is None:
+            self._session = requests.Session()
+
         if 'use_token' not in self._store:
             self._store['use_token'] = False
-        if 'verify' not in self._store:
-            self._store['verify'] = True
 
     def __call__(self, id=None):
         """
@@ -54,7 +57,7 @@ class RestResource(object):
             'use_token': self._store['use_token'],
             'token_type': self._store['token_type'],
             'base_url': self._store['base_url'],
-            'verify': self._store['verify']
+            'session': self._session
         }
 
         new_url = self._store['base_url']
@@ -150,7 +153,7 @@ class RestResource(object):
 
     def get(self, **kwargs):
         try:
-            resp = requests.get(self.url(), headers=self._get_header(), params=kwargs, verify=self._store['verify'])
+            resp = self._session.get(self.url(), headers=self._get_header(), params=kwargs)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -163,9 +166,8 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.post(
-                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
-            )
+            resp = self._session.post(
+                self.url(), data=payload, headers=self._get_header(), params=kwargs)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -178,9 +180,7 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.patch(
-                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
-            )
+            resp = self._session.patch(self.url(), data=payload, headers=self._get_header(), params=kwargs)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -193,9 +193,7 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.put(
-                self.url(), data=payload, headers=self._get_header(), params=kwargs, verify=self._store['verify']
-            )
+            resp = self._session.put(self.url(), data=payload, headers=self._get_header(), params=kwargs)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -208,9 +206,7 @@ class RestResource(object):
             payload = None
 
         try:
-            resp = requests.delete(
-                self.url(), headers=self._get_header(), data=payload, params=kwargs, verify=self._store['verify']
-            )
+            resp = self._session.delete(self.url(), headers=self._get_header(), data=payload, params=kwargs)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -244,13 +240,12 @@ class RestResource(object):
         logger.debug('Uploading file to {}'.format(str(kwargs)))
 
         try:
-            resp = requests.post(
+            resp = self._session.post(
                 self.url(),
                 data=data,
                 files=files,
                 headers=headers,
                 params=kwargs,
-                verify=self._store['verify']
             )
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
@@ -279,21 +274,45 @@ class RestResource(object):
         return self.__class__(**kwargs)
 
 
+class _TimeoutHTTPAdapter(requests.adapters.HTTPAdapter):
+    """Custom http adapter to allow setting timeouts on http verbs.
+
+    See https://github.com/psf/requests/issues/2011#issuecomment-64440818
+    and surrounding discussion in that thread for why this is necessary.
+
+    Short answer is that Session() objects don't support timeouts.
+    """
+    def __init__(self, timeout=None, *args, **kwargs):
+        self.timeout = timeout
+        super(_TimeoutHTTPAdapter, self).__init__(*args, **kwargs)
+
+    def send(self, *args, **kwargs):
+        kwargs['timeout'] = self.timeout
+        return super(_TimeoutHTTPAdapter, self).send(*args, **kwargs)
+
+
 class Api(object):
     token = None
     token_type = DEFAULT_TOKEN_TYPE
     domain = DOMAIN_NAME
     resource_class = RestResource
 
-    def __init__(self, domain=None, token_type=None, verify=True):
+    def __init__(self, domain=None, token_type=None, verify=True, timeout=None, retries=None):
         if domain:
             self.domain = domain
+
         self.base_url = '{0}/{1}'.format(self.domain, API_PREFIX)
         self.use_token = True
         if token_type:
             self.token_type = token_type
 
-        self.verify = verify
+        self.session = requests.Session()
+        self.session.verify = verify
+
+        if retries is not None or timeout is not None:
+            adapter = _TimeoutHTTPAdapter(max_retries=retries, timeout=timeout)
+            self.session.mount('https://', adapter)
+            self.session.mount('http://', adapter)
 
     def set_token(self, token, token_type=None):
         self.token = token
@@ -307,7 +326,7 @@ class Api(object):
         payload = json.dumps(data)
 
         try:
-            r = requests.post(url, data=payload, headers=DEFAULT_HEADERS, verify=self.verify)
+            r = self.session.post(url, data=payload, headers=DEFAULT_HEADERS)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -329,7 +348,7 @@ class Api(object):
         headers['Authorization'] = '{0} {1}'.format(self.token_type, self.token)
 
         try:
-            r = requests.post(url, headers=headers, verify=self.verify)
+            r = self.session.post(url, headers=headers)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -352,7 +371,7 @@ class Api(object):
         payload = json.dumps({'token': self.token})
 
         try:
-            r = requests.post(url, data=payload, headers=DEFAULT_HEADERS, verify=self.verify)
+            r = self.session.post(url, data=payload, headers=DEFAULT_HEADERS)
         except requests.exceptions.SSLError as err:
             raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
 
@@ -384,8 +403,9 @@ class Api(object):
             'base_url': self.base_url,
             'use_token': self.use_token,
             'token_type': self.token_type,
-            'verify': self.verify
+            'session': self.session
         }
+
         kwargs.update({'base_url': '{0}/{1}/'.format(kwargs['base_url'], item)})
 
         return self._get_resource(**kwargs)
