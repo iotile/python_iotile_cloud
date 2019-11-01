@@ -257,7 +257,7 @@ class RestResource(object):
         Upload a file from disk
 
         Args:
-            filename: string representing filename
+            filename: string representing valid file path
             data: object with any additional payload data
             mode: file mode
             kwargs: additional parameters
