@@ -30,7 +30,7 @@ In a Rest API, Resources represent tables in the database. The following resourc
 
 - **account**: Represent users. A user only has access to its own user profile
 - **org**: Users belong to Organizations as members. Some of these users can act as admins for the organization.
-- **porject**: Organizations contain Projects. Projects group information about a given set of devices.
+- **project**: Organizations contain Projects. Projects group information about a given set of devices.
 - **device**: A device represents a physical IOTile devices (Like POD-1) or virtual devices
 - **variable**: Variables are used to represent the outputs of a device. e.g. If a device has two sensors, you 
 may have Variable `IO 1` and `IO 2`.
