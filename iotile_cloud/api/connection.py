@@ -218,29 +218,55 @@ class RestResource(object):
         else:
             return False
 
+    def upload_fp(self, fp, data=None, **kwargs):
+        """
+        Upload a file from an opened file pointer
+
+        Args:
+            fp: File Pointer
+            data: object with any additional payload data
+            kwargs: additional parameters
+
+        Returns:
+            Object representing returned payload from server
+        """
+        files = {
+            'file': fp
+        }
+
+        headers = {}
+        authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
+        headers['Authorization'] = authorization_str
+        logger.debug('Uploading file to {}'.format(str(kwargs)))
+
+        try:
+            resp = self._session.post(
+                self.url(),
+                data=data,
+                files=files,
+                headers=headers,
+                params=kwargs,
+            )
+        except requests.exceptions.SSLError as err:
+            raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
+
+        return self._process_response(resp)
+
     def upload_file(self, filename, data=None, mode='rb', **kwargs):
+        """
+        Upload a file from disk
+
+        Args:
+            filename: string representing valid file path
+            data: object with any additional payload data
+            mode: file mode
+            kwargs: additional parameters
+
+        Returns:
+            Object representing returned payload from server
+        """
         with open(filename, mode) as fp:
-            files = {
-                'file': fp
-            }
-
-            headers = {}
-            authorization_str = '{0} {1}'.format(self._store['token_type'], self._store["token"])
-            headers['Authorization'] = authorization_str
-            logger.debug('Uploading file to {}'.format(str(kwargs)))
-
-            try:
-                resp = self._session.post(
-                    self.url(),
-                    data=data,
-                    files=files,
-                    headers=headers,
-                    params=kwargs,
-                )
-            except requests.exceptions.SSLError as err:
-                raise HttpCouldNotVerifyServerError("Could not verify the server's SSL certificate", err)
-
-            return self._process_response(resp)
+            return self.upload_fp(fp, data, **kwargs)
 
         raise RestBaseException('Unable to open and/or upload file')
 
