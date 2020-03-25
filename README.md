@@ -443,4 +443,9 @@ To deploy to pypi:
 1. Update `CHANGELOG.md` with description of new release
 1. Run `python setup.py test` to ensure everything is ok
 1. Commit all changes to master (PR is needed)
-1. Once everythin commited, create a new version Tag. Deployment is triggered from that.
+1. Once everythin commited, create a new version Tag. Deployment is triggered from that:
+
+```bash
+git tag -a v0.9.13 -m "v0.9.13"
+git push origin v0.9.13
+```
