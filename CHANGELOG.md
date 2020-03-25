@@ -1,3 +1,7 @@
+### v0.9.13 (2020-03-24)
+
+* Updated IOTileDeviceSlug to support hex strings.
+    
 ### v0.9.12 (2019-11-01)
 
 * Add an upload_fp on top of existing upload_file.
