@@ -53,6 +53,14 @@ class GIDTestCase(unittest.TestCase):
         id = IOTileDeviceSlug('d--1234')
         self.assertEqual(str(id), 'd--0000-0000-0000-1234')
 
+        id = IOTileDeviceSlug('0x1234')
+        self.assertEqual(str(id), 'd--0000-0000-0000-1234')
+        self.assertEqual(id.formatted_id(), '0000-0000-0000-1234')
+
+        id = IOTileDeviceSlug('0x1234567')
+        self.assertEqual(str(id), 'd--0000-0000-0123-4567')
+        self.assertEqual(id.formatted_id(), '0000-0000-0123-4567')
+
         id = IOTileDeviceSlug('d--1234-0000-0000-0001', allow_64bits=True)
         self.assertEqual(str(id), 'd--1234-0000-0000-0001')
 
