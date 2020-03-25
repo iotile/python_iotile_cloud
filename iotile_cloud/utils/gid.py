@@ -128,6 +128,11 @@ class IOTileDeviceSlug(IOTileCloudSlug):
             id = gid2int(did)
             if id < 0 or id >= pow(16, hex_count):
                 raise ValueError('IOTileDeviceSlug: UUID should be greater or equal than zero and less than 16^12')
+            
+            # Convert hex string values into a did based on their int value
+            hex_parts = did.split('0x')
+            if len(hex_parts) > 1:
+                did = int2did(id)
 
         self.set_from_single_id_slug('d', 4, did)
 
