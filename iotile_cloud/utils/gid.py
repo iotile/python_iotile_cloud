@@ -52,8 +52,9 @@ class IOTileCloudSlug(object):
         return gid_join(parts[1:])
 
     def set_from_single_id_slug(self, type, terms, id):
-        if type not in ['p', 'd', 'b', 'g']:
-            raise ValueError('Slugs must start with p/d/b/g')
+        if type not in ['p', 'pl', 'ps', 'pa', 'm', 'd', 'b', 'g']:
+            print(type)
+            raise ValueError('Slugs must start with p/pl/ps/pa/m/d/b/g')
         if not isinstance(id, str):
             raise ValueError('Slug must be a string')
         parts = gid_split(id)
@@ -336,3 +337,42 @@ class IOTileStreamSlug(IOTileCloudSlug):
             'variable': str(variable)
         }
         return result
+
+
+class IOTileParentSlug(IOTileCloudSlug):
+    """
+    Formatted Global Site, Area or Line ID:
+       ps--0000-0001, pa--0000-0001, pl--0000-0001
+    """
+    _type = 'pl'
+
+    def __init__(self, id, ptype='pl'):
+        self._type = ptype
+        if isinstance(id, IOTileParentSlug):
+            self._slug = id._slug
+            self._type = id.get_type()
+            return
+        elif isinstance(id, int):
+            if id < 0 or id >= pow(16, 8):
+                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero and less than 16^8')
+            pid = int2pid(id)
+        else:
+            parts = gid_split(id)
+            if len(parts) == 1:
+                pid = parts[0]
+            else:
+                if parts[0] not in ['pl', 'ps', 'pa']:
+                    raise ValueError('IOTileProjectSlug: must start with a "p"')
+                pid = parts[1]
+                self._type = parts[0]
+
+            # Convert to int and back to get rid of anything above 48 bits
+            id = gid2int(pid)
+            if id < 0 or id >= pow(16, 8):
+                raise ValueError('IOTileProjectSlug: UUID should be greater or equal than zero and less than 16^8')
+            pid = int2pid(id)
+
+        self.set_from_single_id_slug(self._type, 2, pid)
+
+    def get_type(self):
+        return self._type

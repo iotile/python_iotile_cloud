@@ -279,3 +279,21 @@ class GIDTestCase(unittest.TestCase):
         self.assertRaises(ValueError, IOTileFleetSlug, -5)
         self.assertRaises(ValueError, IOTileFleetSlug, pow(16,12))
 
+    def test_parent_gid(self):
+        """Ensure that IOTileParentSlug works"""
+        id = IOTileParentSlug(1)
+        self.assertEqual(str(id), 'pl--0000-0001')
+        
+        id = IOTileParentSlug('pl--0001')
+        self.assertEqual(str(id), 'pl--0000-0001')
+
+        id = IOTileParentSlug('ps--002e')
+        self.assertEqual(str(id), 'ps--0000-002e')
+
+        id = IOTileParentSlug('pa--2000')
+        self.assertEqual(str(id), 'pa--0000-2000')
+
+        self.assertRaises(ValueError, IOTileParentSlug, 'any')
+        self.assertRaises(ValueError, IOTileParentSlug, 'o--1234')
+        self.assertRaises(ValueError, IOTileParentSlug, -1)
+
