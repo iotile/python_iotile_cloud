@@ -23,13 +23,13 @@ class BaseMain(object):
         Additional arguments can be configured by overwriting the add_extra_args() method
         Logging configuration can be changed by overwritting the config_logging() method
         """
-        self.config_logging()
         self.parser = argparse.ArgumentParser(description=__doc__)
         self.parser.add_argument('-u', '--user', dest='email', type=str, help='Email used for login')
 
         self.add_extra_args()
 
         self.args = self.parser.parse_args()
+        self.config_logging()
 
         if not self.args.email:
             logger.error('User email is required: --user')
