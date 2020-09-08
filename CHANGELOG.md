@@ -1,3 +1,7 @@
+### v0.9.14 (2020-09-05)
+
+* Minor update to BaseMain class to allow logging configuration to be overriden in subclasses
+
 ### v0.9.13 (2020-03-24)
 
 * Updated IOTileDeviceSlug to support hex strings.
